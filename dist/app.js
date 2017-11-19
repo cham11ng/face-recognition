@@ -84,8 +84,18 @@ var _FaceMess2 = _interopRequireDefault(_FaceMess);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var object = _FaceMess2.default.createById('canvas');
-object.startWebCam();
+var faceMess = _FaceMess2.default.createById('canvas');
+var webCam = false;
+
+faceMess.canvas.addEventListener('click', function () {
+  if (webCam) {
+    faceMess.stopWebCam();
+    webCam = false;
+  } else {
+    faceMess.startWebCam();
+    webCam = true;
+  }
+});
 
 /***/ }),
 /* 2 */
@@ -128,6 +138,9 @@ var FaceMess = function () {
     this.grayScaleContext = this.grayScaleCanvas.getContext('2d');
     this.capturedCanvas = document.getElementById('capturedImage');
     this.capturedContext = this.capturedCanvas.getContext('2d');
+
+    this.cameraTimeout = function () {};
+    this.stream = {};
   }
 
   _createClass(FaceMess, [{
@@ -143,17 +156,24 @@ var FaceMess = function () {
         audio: false
       }, function (stream) {
         video.src = window.URL.createObjectURL(stream);
+        _this.stream = stream;
         draw(video, _this.context);
       }, function (error) {
         console.log(error);
       });
 
-      function draw(video, context) {
+      var draw = function draw(video, context) {
         context.drawImage(video, 0, 0);
-        setTimeout(draw, 10, video, context);
-      }
+        _this.cameraTimeout = setTimeout(draw, 10, video, context);
+      };
 
       this.captureImage();
+    }
+  }, {
+    key: "stopWebCam",
+    value: function stopWebCam() {
+      this.stream.getTracks()[0].stop();
+      clearTimeout(this.cameraTimeout);
     }
   }, {
     key: "captureImage",

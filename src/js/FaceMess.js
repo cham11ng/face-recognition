@@ -13,6 +13,9 @@ class FaceMess {
     this.grayScaleContext = this.grayScaleCanvas.getContext('2d');
     this.capturedCanvas = document.getElementById('capturedImage');
     this.capturedContext = this.capturedCanvas.getContext('2d');
+
+    this.cameraTimeout = () => {};
+    this.stream = {};
   }
 
   static createById(id) {
@@ -35,17 +38,23 @@ class FaceMess {
       audio: false
     }, (stream) => {
       video.src = window.URL.createObjectURL(stream);
+      this.stream = stream;
       draw(video, this.context);
     }, function (error) {
       console.log(error);
     });
 
-    function draw(video, context) {
+    let draw = (video, context) => {
       context.drawImage(video, 0, 0);
-      setTimeout(draw, 10, video, context);
-    }
+      this.cameraTimeout = setTimeout(draw, 10, video, context);
+    };
 
     this.captureImage();
+  }
+
+  stopWebCam() {
+    this.stream.getTracks()[0].stop();
+    clearTimeout(this.cameraTimeout);
   }
 
   captureImage() {
