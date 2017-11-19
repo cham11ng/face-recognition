@@ -8,6 +8,7 @@ class ImageProcessor {
     for (let i = 0, dataLength = data.length; i < dataLength; i += 4) {
       data[i] = data[i + 1] = data[i + 2] = data[i] * 0.3 + data[i + 1] * 0.59 + data[i + 2] * 0.11;
     }
+    imageData.data = data;
 
     return imageData;
   }

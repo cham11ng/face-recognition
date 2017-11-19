@@ -1,13 +1,15 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Canvas</title>
+  <title>Face Mess</title>
   <link rel="stylesheet" type="text/css" href="dist/app.css">
 </head>
 <body>
-<div class="container">
-  <canvas id="image" height="200px" width="200px"></canvas>
-</div>
-<script type="text/javascript" src="dist/app.js"></script>
+  <div class="container">
+    <canvas id="canvas" height="480" width="640"></canvas>
+    <div id="capture" class="capture-button">Take Photo</div>
+    <canvas id="capturedImage" height="480" width="640"></canvas>
+  </div>
+  <script type="text/javascript" src="dist/app.js"></script>
 </body>
 </html>

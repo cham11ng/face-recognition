@@ -6,5 +6,18 @@ canvas {
 }
 
 .container {
+  width: 640px;
+  margin: 0 auto;
+  background: #ccc;
+  border: 10px solid #ddd;
+}
+
+.capture-button {
+  display: block;
+  margin: 10px 0;
+  padding: 10px 20px;
+  background-color: cornflowerblue;
+  color: #fff;
   text-align: center;
+  cursor: pointer;
 }
