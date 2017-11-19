@@ -1,7 +1,7 @@
 import FaceMess from "./js/FaceMess";
 
 let canvas = FaceMess.createWithImage('image', 'images/cham11ng.jpg');
-canvas.extractFacialFeature();
+// canvas.extractFacialFeature();
 
 // let duplicate = canvas.cloneNode(true);
 
