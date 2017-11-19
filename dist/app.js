@@ -68,7 +68,7 @@
 /***/ (function(module, exports, __webpack_require__) {
 
 __webpack_require__(1);
-module.exports = __webpack_require__(5);
+module.exports = __webpack_require__(6);
 
 
 /***/ }),
@@ -97,6 +97,10 @@ faceMess.canvas.addEventListener('click', function () {
   }
 });
 
+document.getElementById('capture').addEventListener('click', function () {
+  faceMess.capture();
+});
+
 /***/ }),
 /* 2 */
 /***/ (function(module, exports, __webpack_require__) {
@@ -118,6 +122,10 @@ var _ImageProcessor = __webpack_require__(4);
 
 var _ImageProcessor2 = _interopRequireDefault(_ImageProcessor);
 
+var _WebCam = __webpack_require__(5);
+
+var _WebCam2 = _interopRequireDefault(_WebCam);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
@@ -129,6 +137,7 @@ var FaceMess = function () {
     _classCallCheck(this, FaceMess);
 
     this.canvas = canvas;
+    this.webcam = new _WebCam2.default();
     this.width = this.canvas.width;
     this.height = this.canvas.height;
     this.context = this.canvas.getContext('2d');
@@ -138,65 +147,36 @@ var FaceMess = function () {
     this.grayScaleContext = this.grayScaleCanvas.getContext('2d');
     this.capturedCanvas = document.getElementById('capturedImage');
     this.capturedContext = this.capturedCanvas.getContext('2d');
-
-    this.cameraTimeout = function () {};
-    this.stream = {};
   }
 
   _createClass(FaceMess, [{
     key: "startWebCam",
     value: function startWebCam() {
-      var _this = this;
-
-      var video = document.createElement('video');
-
-      // capture video
-      navigator.getUserMedia({
-        video: true,
-        audio: false
-      }, function (stream) {
-        video.src = window.URL.createObjectURL(stream);
-        _this.stream = stream;
-        draw(video, _this.context);
-      }, function (error) {
-        console.log(error);
-      });
-
-      var draw = function draw(video, context) {
-        context.drawImage(video, 0, 0);
-        _this.cameraTimeout = setTimeout(draw, 10, video, context);
-      };
-
-      this.captureImage();
+      this.webcam.start(this.context);
     }
   }, {
     key: "stopWebCam",
     value: function stopWebCam() {
-      this.stream.getTracks()[0].stop();
-      clearTimeout(this.cameraTimeout);
+      this.webcam.stop();
     }
   }, {
-    key: "captureImage",
-    value: function captureImage() {
-      var _this2 = this;
-
-      document.getElementById('capture').addEventListener('click', function () {
-        _this2.capturedContext.drawImage(_this2.canvas, 0, 0, utils.WIDTH, utils.HEIGHT);
-        _this2.extractFeature();
-      });
+    key: "capture",
+    value: function capture() {
+      this.capturedContext.drawImage(this.canvas, 0, 0, utils.WIDTH, utils.HEIGHT);
+      this.extractFeature();
     }
   }, {
     key: "browseImage",
     value: function browseImage(src) {
-      var _this3 = this;
+      var _this = this;
 
       var image = new Image();
       image.src = src;
       image.onload = function () {
-        _this3.context.drawImage(image, 0, 0, _this3.height, _this3.width);
-        _this3.grayScaleContext.drawImage(_this3.canvas, 0, 0);
-        _this3.featureContext.drawImage(_this3.grayScaleCanvas, 0, 0);
-        _this3.extractFeature();
+        _this.context.drawImage(image, 0, 0, _this.height, _this.width);
+        _this.grayScaleContext.drawImage(_this.canvas, 0, 0);
+        _this.featureContext.drawImage(_this.grayScaleCanvas, 0, 0);
+        _this.extractFeature();
       };
     }
   }, {
@@ -344,6 +324,63 @@ exports.default = ImageProcessor;
 
 /***/ }),
 /* 5 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var WebCam = function () {
+  function WebCam() {
+    _classCallCheck(this, WebCam);
+
+    this.stream = '';
+    this.cameraTimeout = '';
+    this.video = document.createElement('video');
+  }
+
+  _createClass(WebCam, [{
+    key: 'start',
+    value: function start(context) {
+      var _this = this;
+
+      navigator.getUserMedia({
+        video: true,
+        audio: false
+      }, function (stream) {
+        _this.video.src = window.URL.createObjectURL(stream);
+        _this.stream = stream;
+        draw(_this.video, context);
+      }, function (error) {
+        console.log(error);
+      });
+      var draw = function draw(video) {
+        context.drawImage(video, 0, 0);
+        _this.cameraTimeout = setTimeout(draw, 10, video, context);
+      };
+    }
+  }, {
+    key: 'stop',
+    value: function stop() {
+      clearTimeout(this.cameraTimeout);
+      this.stream.getTracks()[0].stop();
+    }
+  }]);
+
+  return WebCam;
+}();
+
+exports.default = WebCam;
+
+/***/ }),
+/* 6 */
 /***/ (function(module, exports) {
 
 // removed by extract-text-webpack-plugin

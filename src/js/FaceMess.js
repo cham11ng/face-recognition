@@ -1,9 +1,11 @@
 import * as utils from "./Utils";
 import ImageProcessor from "./ImageProcessor";
+import WebCam from "./WebCam";
 
 class FaceMess {
   constructor(canvas) {
     this.canvas = canvas;
+    this.webcam = new WebCam();
     this.width = this.canvas.width;
     this.height = this.canvas.height;
     this.context = this.canvas.getContext('2d');
@@ -13,9 +15,6 @@ class FaceMess {
     this.grayScaleContext = this.grayScaleCanvas.getContext('2d');
     this.capturedCanvas = document.getElementById('capturedImage');
     this.capturedContext = this.capturedCanvas.getContext('2d');
-
-    this.cameraTimeout = () => {};
-    this.stream = {};
   }
 
   static createById(id) {
@@ -30,38 +29,16 @@ class FaceMess {
   }
 
   startWebCam() {
-    let video = document.createElement('video');
-
-    // capture video
-    navigator.getUserMedia({
-      video: true,
-      audio: false
-    }, (stream) => {
-      video.src = window.URL.createObjectURL(stream);
-      this.stream = stream;
-      draw(video, this.context);
-    }, function (error) {
-      console.log(error);
-    });
-
-    let draw = (video, context) => {
-      context.drawImage(video, 0, 0);
-      this.cameraTimeout = setTimeout(draw, 10, video, context);
-    };
-
-    this.captureImage();
+    this.webcam.start(this.context);
   }
 
   stopWebCam() {
-    this.stream.getTracks()[0].stop();
-    clearTimeout(this.cameraTimeout);
+    this.webcam.stop();
   }
 
-  captureImage() {
-    document.getElementById('capture').addEventListener('click', () => {
-      this.capturedContext.drawImage(this.canvas, 0, 0, utils.WIDTH, utils.HEIGHT);
-      this.extractFeature();
-    });
+  capture() {
+    this.capturedContext.drawImage(this.canvas, 0, 0, utils.WIDTH, utils.HEIGHT);
+    this.extractFeature();
   }
 
   browseImage(src) {

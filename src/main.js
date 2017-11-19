@@ -12,3 +12,7 @@ faceMess.canvas.addEventListener('click', () => {
     webCam = true;
   }
 });
+
+document.getElementById('capture').addEventListener('click', () => {
+  faceMess.capture();
+});
