@@ -48,14 +48,10 @@ class FaceMess {
     this.captureImage();
   }
 
-  drawStream(video, context, width, height) {
-    context.drawImage(video, 0, 0, width, height);
-    setTimeout(this.drawStream, 10, video, context, width, height);
-  }
-
   captureImage() {
     document.getElementById('capture').addEventListener('click', () => {
       this.capturedContext.drawImage(this.canvas, 0, 0, utils.WIDTH, utils.HEIGHT);
+      this.extractFeature();
     });
   }
 
@@ -71,7 +67,8 @@ class FaceMess {
   }
 
   extractFeature() {
-    let imageData = ImageProcessor.getImageData(this.canvas);
+    let imageData = ImageProcessor.getImageData(this.capturedCanvas);
+    this.grayScaleContext.drawImage(this.canvas, 0, 0);
     let grayScaleImageData = ImageProcessor.getImageData(this.grayScaleCanvas);
     grayScaleImageData = ImageProcessor.rgb2gray(grayScaleImageData);
     let data = imageData.data;
@@ -83,8 +80,8 @@ class FaceMess {
       }
       data[i] = data[i + 1] = data[i + 2] = this.getLBPOfPixel(grayScaleImageData.data, utils.POINT_8, utils.RADIUS_1, i / 4);
     }
-    imageData.data = data;
-    this.context.putImageData(imageData, 0, 0);
+
+    this.capturedContext.putImageData(imageData, 0, 0);
   }
 
   getLBPOfPixel(data, p, r, centerPosition) {
