@@ -1,6 +1,7 @@
 class WebCam {
   constructor() {
     this.stream = '';
+    this.isActive = false;
     this.cameraTimeout = '';
     this.video = document.createElement('video');
   }
@@ -20,11 +21,13 @@ class WebCam {
       context.drawImage(video, 0, 0);
       this.cameraTimeout = setTimeout(draw, 10, video, context);
     };
+    this.isActive = true;
   }
 
   stop() {
     clearTimeout(this.cameraTimeout);
     this.stream.getTracks()[0].stop();
+    this.isActive = false;
   }
 }
 

@@ -26,12 +26,8 @@ class FaceMess {
     return canvasObject;
   }
 
-  startWebCam() {
-    this.webcam.start(this.context);
-  }
-
-  stopWebCam() {
-    this.webcam.stop();
+  triggerWebCam() {
+    this.webcam.isActive ? this.webcam.stop() : this.webcam.start(this.context);
   }
 
   capture() {
@@ -57,7 +53,8 @@ class FaceMess {
 
     for (let i = 0, dataLength = data.length; i < dataLength; i += 4) {
       let coordinate = utils.getCoordinate(this.width, i / 4);
-      if (coordinate.x < utils.RADIUS_1 // ignoring border
+      // ignoring border
+      if (coordinate.x < utils.RADIUS_1
         || coordinate.y < utils.RADIUS_1
         || coordinate.x >= (this.width - utils.RADIUS_1)
         || coordinate.y >= (this.height - utils.RADIUS_1)) {
@@ -71,8 +68,8 @@ class FaceMess {
 
   getLBPOfPixel(data, p, r, centerPosition) {
     let sum = 0;
-    for (let i = 0; i < p; i++) {
-      let difference = data[this.getNeighbourPosition(p, r, centerPosition, i) * 4] - data[centerPosition];
+    for (let i = 0, dataCenter = data[centerPosition]; i < p; i++) {
+      let difference = data[this.getNeighbourPosition(p, r, centerPosition, i) * 4] - dataCenter;
       sum += utils.unitStep(difference) * Math.pow(2, p - (i + 1));
     }
 
@@ -80,7 +77,7 @@ class FaceMess {
   }
 
   getNeighbourPosition(p, r, centerPosition, point) {
-    let coordinate = utils.getCoordinate(this.width, centerPosition);
+    let coordinate = utils.getCoordinate(this.width, centerPosition); 
 
     return utils.get1DPosition(
       this.width,

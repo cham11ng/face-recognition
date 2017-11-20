@@ -87,16 +87,9 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 // let canvas = FaceMess.createWithImage('canvas', 'images/cham11ng.jpg');
 
 var faceMess = _FaceMess2.default.createById('canvas');
-var webCam = false;
 
 faceMess.canvas.addEventListener('click', function () {
-  if (webCam) {
-    faceMess.stopWebCam();
-    webCam = false;
-  } else {
-    faceMess.startWebCam();
-    webCam = true;
-  }
+  faceMess.triggerWebCam();
 });
 
 document.getElementById('capture').addEventListener('click', function () {
@@ -150,14 +143,9 @@ var FaceMess = function () {
   }
 
   _createClass(FaceMess, [{
-    key: "startWebCam",
-    value: function startWebCam() {
-      this.webcam.start(this.context);
-    }
-  }, {
-    key: "stopWebCam",
-    value: function stopWebCam() {
-      this.webcam.stop();
+    key: "triggerWebCam",
+    value: function triggerWebCam() {
+      this.webcam.isActive ? this.webcam.stop() : this.webcam.start(this.context);
     }
   }, {
     key: "capture",
@@ -188,8 +176,8 @@ var FaceMess = function () {
 
       for (var i = 0, dataLength = data.length; i < dataLength; i += 4) {
         var coordinate = utils.getCoordinate(this.width, i / 4);
-        if (coordinate.x < utils.RADIUS_1 // ignoring border
-        || coordinate.y < utils.RADIUS_1 || coordinate.x >= this.width - utils.RADIUS_1 || coordinate.y >= this.height - utils.RADIUS_1) {
+        // ignoring border
+        if (coordinate.x < utils.RADIUS_1 || coordinate.y < utils.RADIUS_1 || coordinate.x >= this.width - utils.RADIUS_1 || coordinate.y >= this.height - utils.RADIUS_1) {
           continue;
         }
         data[i] = data[i + 1] = data[i + 2] = this.getLBPOfPixel(grayScaleImageData.data, utils.POINT_8, utils.RADIUS_1, i / 4);
@@ -201,8 +189,8 @@ var FaceMess = function () {
     key: "getLBPOfPixel",
     value: function getLBPOfPixel(data, p, r, centerPosition) {
       var sum = 0;
-      for (var i = 0; i < p; i++) {
-        var difference = data[this.getNeighbourPosition(p, r, centerPosition, i) * 4] - data[centerPosition];
+      for (var i = 0, dataCenter = data[centerPosition]; i < p; i++) {
+        var difference = data[this.getNeighbourPosition(p, r, centerPosition, i) * 4] - dataCenter;
         sum += utils.unitStep(difference) * Math.pow(2, p - (i + 1));
       }
 
@@ -255,6 +243,7 @@ var WebCam = function () {
     _classCallCheck(this, WebCam);
 
     this.stream = '';
+    this.isActive = false;
     this.cameraTimeout = '';
     this.video = document.createElement('video');
   }
@@ -278,12 +267,14 @@ var WebCam = function () {
         context.drawImage(video, 0, 0);
         _this.cameraTimeout = setTimeout(draw, 10, video, context);
       };
+      this.isActive = true;
     }
   }, {
     key: 'stop',
     value: function stop() {
       clearTimeout(this.cameraTimeout);
       this.stream.getTracks()[0].stop();
+      this.isActive = false;
     }
   }]);
 
