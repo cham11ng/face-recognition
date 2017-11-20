@@ -1,5 +1,6 @@
 import WebCam from "./WebCam";
 import * as utils from "./Utils";
+import Histogram from "./Histogram";
 import ImageProcessor from "./ImageProcessor";
 
 class FaceMess {
@@ -30,9 +31,14 @@ class FaceMess {
     this.webcam.isActive ? this.webcam.stop() : this.webcam.start(this.context);
   }
 
+  generateHistogramValue() {
+    console.log(Histogram.uniformBinaryPixels(ImageProcessor.getImageData(this.capturedCanvas)));
+  }
+
   capture() {
     this.capturedContext.drawImage(this.canvas, 0, 0, utils.WIDTH, utils.HEIGHT);
     this.extractFeature();
+    this.generateHistogramValue();
   }
 
   browseImage(src) {
@@ -41,6 +47,7 @@ class FaceMess {
     image.onload = () => {
       this.capturedContext.drawImage(image, 0, 0, this.height, this.width);
       this.extractFeature();
+      this.generateHistogramValue();
     };
   }
 

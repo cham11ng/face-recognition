@@ -117,6 +117,10 @@ var _Utils = __webpack_require__(4);
 
 var utils = _interopRequireWildcard(_Utils);
 
+var _Histogram = __webpack_require__(11);
+
+var _Histogram2 = _interopRequireDefault(_Histogram);
+
 var _ImageProcessor = __webpack_require__(5);
 
 var _ImageProcessor2 = _interopRequireDefault(_ImageProcessor);
@@ -148,10 +152,16 @@ var FaceMess = function () {
       this.webcam.isActive ? this.webcam.stop() : this.webcam.start(this.context);
     }
   }, {
+    key: "generateHistogramValue",
+    value: function generateHistogramValue() {
+      console.log(_Histogram2.default.uniformBinaryPixels(_ImageProcessor2.default.getImageData(this.capturedCanvas)));
+    }
+  }, {
     key: "capture",
     value: function capture() {
       this.capturedContext.drawImage(this.canvas, 0, 0, utils.WIDTH, utils.HEIGHT);
       this.extractFeature();
+      this.generateHistogramValue();
     }
   }, {
     key: "browseImage",
@@ -163,6 +173,7 @@ var FaceMess = function () {
       image.onload = function () {
         _this.capturedContext.drawImage(image, 0, 0, _this.height, _this.width);
         _this.extractFeature();
+        _this.generateHistogramValue();
       };
     }
   }, {
@@ -374,6 +385,63 @@ exports.default = ImageProcessor;
 /***/ (function(module, exports) {
 
 // removed by extract-text-webpack-plugin
+
+/***/ }),
+/* 7 */,
+/* 8 */,
+/* 9 */,
+/* 10 */,
+/* 11 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _Utils = __webpack_require__(4);
+
+var utils = _interopRequireWildcard(_Utils);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Histogram = function () {
+  function Histogram() {
+    _classCallCheck(this, Histogram);
+  }
+
+  _createClass(Histogram, null, [{
+    key: 'uniformBinaryPixels',
+    value: function uniformBinaryPixels(imageData) {
+      var histogramData = [],
+          data = imageData.data;
+      for (var i = 0, uniformLength = utils.UNIFORM_BINARY_PATTERN.length; i < uniformLength; i++) {
+        var count = 0;
+        for (var j = 0, dataLength = data.length; j < dataLength; j += 4) {
+          if (utils.UNIFORM_BINARY_PATTERN[i] === data[j]) {
+            count++;
+          }
+        }
+        histogramData.push({
+          'bin': utils.UNIFORM_BINARY_PATTERN[i],
+          'frequency': count
+        });
+      }
+
+      return histogramData;
+    }
+  }]);
+
+  return Histogram;
+}();
+
+exports.default = Histogram;
 
 /***/ })
 /******/ ]);
