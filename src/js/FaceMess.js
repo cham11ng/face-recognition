@@ -1,6 +1,6 @@
+import WebCam from "./WebCam";
 import * as utils from "./Utils";
 import ImageProcessor from "./ImageProcessor";
-import WebCam from "./WebCam";
 
 class FaceMess {
   constructor(canvas) {
@@ -9,9 +9,7 @@ class FaceMess {
     this.width = this.canvas.width;
     this.height = this.canvas.height;
     this.context = this.canvas.getContext('2d');
-    this.featureCanvas = this.canvas.cloneNode(true);
     this.grayScaleCanvas = this.canvas.cloneNode(true);
-    this.featureContext = this.featureCanvas.getContext('2d');
     this.grayScaleContext = this.grayScaleCanvas.getContext('2d');
     this.capturedCanvas = document.getElementById('capturedImage');
     this.capturedContext = this.capturedCanvas.getContext('2d');
@@ -45,26 +43,24 @@ class FaceMess {
     let image = new Image();
     image.src = src;
     image.onload = () => {
-      this.context.drawImage(image, 0, 0, this.height, this.width);
-      this.grayScaleContext.drawImage(this.canvas, 0, 0);
-      this.featureContext.drawImage(this.grayScaleCanvas, 0, 0);
+      this.capturedContext.drawImage(image, 0, 0, this.height, this.width);
       this.extractFeature();
     };
   }
 
   extractFeature() {
     let imageData = ImageProcessor.getImageData(this.capturedCanvas);
-    this.grayScaleContext.drawImage(this.canvas, 0, 0);
+    this.grayScaleContext.drawImage(this.capturedCanvas, 0, 0);
     let grayScaleImageData = ImageProcessor.getImageData(this.grayScaleCanvas);
     grayScaleImageData = ImageProcessor.rgb2gray(grayScaleImageData);
     let data = imageData.data;
 
     for (let i = 0, dataLength = data.length; i < dataLength; i += 4) {
       let coordinate = utils.getCoordinate(this.width, i / 4);
-      if (coordinate.x === (utils.RADIUS_1 - 1) // ignoring border
-        || coordinate.y === (utils.RADIUS_1 - 1)
-        || coordinate.x === (this.width - utils.RADIUS_1)
-        || coordinate.y === (this.height - utils.RADIUS_1)) {
+      if (coordinate.x < utils.RADIUS_1 // ignoring border
+        || coordinate.y < utils.RADIUS_1
+        || coordinate.x >= (this.width - utils.RADIUS_1)
+        || coordinate.y >= (this.height - utils.RADIUS_1)) {
         continue;
       }
       data[i] = data[i + 1] = data[i + 2] = this.getLBPOfPixel(grayScaleImageData.data, utils.POINT_8, utils.RADIUS_1, i / 4);
