@@ -1,5 +1,7 @@
 import FaceMess from './js/FaceMess';
 
+// let canvas = FaceMess.createWithImage('image', 'images/cham11ng.jpg');
+
 let faceMess = FaceMess.createById('canvas');
 let webCam = false;
 

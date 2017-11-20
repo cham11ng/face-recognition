@@ -61,7 +61,10 @@ class FaceMess {
 
     for (let i = 0, dataLength = data.length; i < dataLength; i += 4) {
       let coordinate = utils.getCoordinate(this.width, i / 4);
-      if (coordinate.x === 0 || coordinate.y === 0 || coordinate.x === this.width - 1 || coordinate.y === this.height - 1) {
+      if (coordinate.x === (utils.RADIUS_1 - 1) // ignoring border
+        || coordinate.y === (utils.RADIUS_1 - 1)
+        || coordinate.x === (this.width - utils.RADIUS_1)
+        || coordinate.y === (this.height - utils.RADIUS_1)) {
         continue;
       }
       data[i] = data[i + 1] = data[i + 2] = this.getLBPOfPixel(grayScaleImageData.data, utils.POINT_8, utils.RADIUS_1, i / 4);
@@ -74,7 +77,7 @@ class FaceMess {
     let sum = 0;
     for (let i = 0; i < p; i++) {
       let difference = data[this.getNeighbourPosition(p, r, centerPosition, i) * 4] - data[centerPosition];
-      sum += utils.unitStep(difference) * Math.pow(2, (p - i - 1) % p);
+      sum += utils.unitStep(difference) * Math.pow(2, p - (i + 1));
     }
 
     return sum;
