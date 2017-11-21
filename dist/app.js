@@ -310,6 +310,8 @@ var WebCam = function () {
     this.stream = '';
     this.isActive = false;
     this.cameraTimeout = '';
+    this.scaleH = -1;
+    this.scaleV = 1;
     this.video = document.createElement('video');
   }
 
@@ -318,6 +320,8 @@ var WebCam = function () {
     value: function start(context) {
       var _this = this;
 
+      var positionX = (this.scaleH === 1 ? 0 : utils.CANVAS_WIDTH * -1) + (utils.CANVAS_WIDTH - utils.CAMERA_WIDTH) / 2;
+      var positionY = (this.scaleV === 1 ? 0 : utils.CANVAS_HEIGHT * -1) + (utils.CANVAS_HEIGHT - utils.CAMERA_HEIGHT) / 2;
       navigator.getUserMedia({
         video: true,
         audio: false
@@ -329,7 +333,10 @@ var WebCam = function () {
         console.log(error);
       });
       var draw = function draw(video) {
-        context.drawImage(video, (utils.CANVAS_WIDTH - utils.CAMERA_WIDTH) / 2, (utils.CANVAS_HEIGHT - utils.CAMERA_HEIGHT) / 2);
+        context.save();
+        context.scale(_this.scaleH, _this.scaleV);
+        context.drawImage(video, positionX, positionY);
+        context.restore();
         _this.cameraTimeout = setTimeout(draw, 10, video, context);
       };
       this.isActive = true;
