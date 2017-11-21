@@ -32,7 +32,7 @@ class FaceMess {
   }
 
   generateHistogramValue() {
-    console.log(Histogram.uniformBinaryPixels(ImageProcessor.getImageData(this.capturedCanvas)));
+    console.log(Histogram.uniformBinary(ImageProcessor.getImageData(this.capturedCanvas)));
   }
 
   capture() {
@@ -58,7 +58,7 @@ class FaceMess {
     let data = imageData.data;
 
     for (let y = 1; y < this.height - 1; y++) {
-      for (let x = 1, index = 0; x < this.width - 1; x++, index+=4) {
+      for (let x = 1, index = 0; x < this.width - 1; x++, index += 4) {
         let sum = 0;
         let neighbourValue = [];
         let centerPosition = utils.get1DPosition(this.width, x, y) * utils.RGBA_SHIFT;
