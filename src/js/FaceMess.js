@@ -47,50 +47,39 @@ class FaceMess {
     image.onload = () => {
       this.capturedContext.drawImage(image, 0, 0, this.height, this.width);
       this.extractFeature();
-      this.generateHistogramValue();
+      // this.generateHistogramValue();
     };
   }
 
   extractFeature() {
     let imageData = ImageProcessor.getImageData(this.capturedCanvas);
     this.grayScaleContext.drawImage(this.capturedCanvas, 0, 0);
-    let grayScaleImageData = ImageProcessor.getImageData(this.grayScaleCanvas);
-    grayScaleImageData = ImageProcessor.rgb2gray(grayScaleImageData);
+    let grayScaleData = ImageProcessor.rgbCanvas2grey(this.grayScaleCanvas);
     let data = imageData.data;
 
-    for (let i = 0, dataLength = data.length; i < dataLength; i += 4) {
-      let coordinate = utils.getCoordinate(this.width, i / 4);
-      // ignoring border
-      if (coordinate.x < utils.RADIUS_1
-        || coordinate.y < utils.RADIUS_1
-        || coordinate.x >= (this.width - utils.RADIUS_1)
-        || coordinate.y >= (this.height - utils.RADIUS_1)) {
-        continue;
+    for (let y = 1; y < this.height - 1; y++) {
+      for (let x = 1, index = 0; x < this.width - 1; x++, index+=4) {
+        let sum = 0;
+        let neighbourValue = [];
+        let centerPosition = utils.get1DPosition(this.width, x, y) * utils.RGBA_SHIFT;
+        let centerValue = grayScaleData[centerPosition];
+        neighbourValue[7] = grayScaleData[utils.get1DPosition(this.width, x - 1, y - 1) * utils.RGBA_SHIFT] - centerValue;
+        neighbourValue[6] = grayScaleData[utils.get1DPosition(this.width, x, y - 1) * utils.RGBA_SHIFT] - centerValue;
+        neighbourValue[5] = grayScaleData[utils.get1DPosition(this.width, x + 1, y - 1) * utils.RGBA_SHIFT] - centerValue;
+        neighbourValue[4] = grayScaleData[utils.get1DPosition(this.width, x + 1, y) * utils.RGBA_SHIFT] - centerValue;
+        neighbourValue[3] = grayScaleData[utils.get1DPosition(this.width, x + 1, y + 1) * utils.RGBA_SHIFT] - centerValue;
+        neighbourValue[2] = grayScaleData[utils.get1DPosition(this.width, x, y + 1) * utils.RGBA_SHIFT] - centerValue;
+        neighbourValue[1] = grayScaleData[utils.get1DPosition(this.width, x - 1, y + 1) * utils.RGBA_SHIFT] - centerValue;
+        neighbourValue[0] = grayScaleData[utils.get1DPosition(this.width, x - 1, y) * utils.RGBA_SHIFT] - centerValue;
+
+        for (let k = 0, totalNeighbour = neighbourValue.length; k < totalNeighbour; k++) {
+          sum += utils.unitStep(neighbourValue[k]) * Math.pow(2, k);
+        }
+        data[centerPosition] = data[centerPosition + 1] = data[centerPosition + 2] = sum;
       }
-      data[i] = data[i + 1] = data[i + 2] = this.getLBPOfPixel(grayScaleImageData.data, utils.POINT_8, utils.RADIUS_1, i / 4);
     }
 
     this.capturedContext.putImageData(imageData, 0, 0);
-  }
-
-  getLBPOfPixel(data, p, r, centerPosition) {
-    let sum = 0;
-    for (let i = 0, dataCenter = data[centerPosition]; i < p; i++) {
-      let difference = data[this.getNeighbourPosition(p, r, centerPosition, i) * 4] - dataCenter;
-      sum += utils.unitStep(difference) * Math.pow(2, p - (i + 1));
-    }
-
-    return sum;
-  }
-
-  getNeighbourPosition(p, r, centerPosition, point) {
-    let coordinate = utils.getCoordinate(this.width, centerPosition); 
-
-    return utils.get1DPosition(
-      this.width,
-      coordinate.x + r * Math.floor(Math.round(Math.cos(2 * Math.PI * (point - utils.NEIGHBOUR_SHIFT) / p))),
-      coordinate.y + r * Math.floor(Math.round(Math.sin(2 * Math.PI * (point - utils.NEIGHBOUR_SHIFT) / p)))
-    );
   }
 }
 
