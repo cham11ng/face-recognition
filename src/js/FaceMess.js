@@ -49,10 +49,18 @@ class FaceMess {
     let image = new Image();
     image.src = src;
     image.onload = () => {
-      this.capturedContext.drawImage(image, (this.width - utils.CAMERA_WIDTH) / 2, (this.height - utils.CAMERA_HEIGHT) / 2, this.height, this.width);
+      let scale = this.width / image.width;
+      this.capturedContext.clearRect(0, 0, this.width, this.height);
+      this.capturedContext.drawImage(image, 0, (this.height - image.height * scale) / 2, this.width, image.height * scale);
       this.extractFeature();
       this.generateHistogramValue();
     };
+  }
+
+  handleLocalFile(file) {
+    if (file.type.match(/image.*/)) {
+      this.browseImage(window.URL.createObjectURL(file));
+    }
   }
 
   extractFeature() {
@@ -83,6 +91,7 @@ class FaceMess {
       }
     }
 
+    this.capturedContext.clearRect(0, 0, this.width, this.height);
     this.capturedContext.putImageData(imageData, 0, 0);
   }
 }

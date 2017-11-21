@@ -126,10 +126,15 @@ var _FaceMess2 = _interopRequireDefault(_FaceMess);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-// let canvas = FaceMess.createWithImage('canvas', 'images/cham11ng.jpg');
+var canvas = _FaceMess2.default.createWithImage('canvas', 'images/lenna.png');
 
 var faceMess = _FaceMess2.default.createById('canvas');
 var webCamIcon = document.querySelector('#webCam .fa');
+
+document.getElementById("fileSelector").addEventListener("change", function () {
+  var files = this.files;
+  if (files.length) faceMess.handleLocalFile(files[0]);
+});
 
 document.getElementById('webCam').addEventListener('click', function () {
   if (faceMess.webcam.isActive) {
@@ -225,10 +230,19 @@ var FaceMess = function () {
       var image = new Image();
       image.src = src;
       image.onload = function () {
-        _this.capturedContext.drawImage(image, (_this.width - utils.CAMERA_WIDTH) / 2, (_this.height - utils.CAMERA_HEIGHT) / 2, _this.height, _this.width);
+        var scale = _this.width / image.width;
+        _this.capturedContext.clearRect(0, 0, _this.width, _this.height);
+        _this.capturedContext.drawImage(image, 0, (_this.height - image.height * scale) / 2, _this.width, image.height * scale);
         _this.extractFeature();
         _this.generateHistogramValue();
       };
+    }
+  }, {
+    key: "handleLocalFile",
+    value: function handleLocalFile(file) {
+      if (file.type.match(/image.*/)) {
+        this.browseImage(window.URL.createObjectURL(file));
+      }
     }
   }, {
     key: "extractFeature",
@@ -260,6 +274,7 @@ var FaceMess = function () {
         }
       }
 
+      this.capturedContext.clearRect(0, 0, this.width, this.height);
       this.capturedContext.putImageData(imageData, 0, 0);
     }
   }], [{

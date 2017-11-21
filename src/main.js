@@ -1,9 +1,15 @@
 import FaceMess from './js/FaceMess';
 
-// let canvas = FaceMess.createWithImage('canvas', 'images/cham11ng.jpg');
+let canvas = FaceMess.createWithImage('canvas', 'images/lenna.png');
 
 let faceMess = FaceMess.createById('canvas');
 let webCamIcon = document.querySelector('#webCam .fa');
+
+document.getElementById("fileSelector").addEventListener("change", function () {
+  let files = this.files;
+  if (files.length)
+    faceMess.handleLocalFile(files[0]);
+});
 
 document.getElementById('webCam').addEventListener('click', () => {
   if (faceMess.webcam.isActive) {
