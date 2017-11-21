@@ -1,3 +1,5 @@
+import * as utils from "./Utils";
+
 class WebCam {
   constructor() {
     this.stream = '';
@@ -18,7 +20,7 @@ class WebCam {
       console.log(error);
     });
     let draw = (video) => {
-      context.drawImage(video, 0, 0);
+      context.drawImage(video, (utils.CANVAS_WIDTH - utils.CAMERA_WIDTH) / 2, (utils.CANVAS_HEIGHT - utils.CAMERA_HEIGHT) / 2);
       this.cameraTimeout = setTimeout(draw, 10, video, context);
     };
     this.isActive = true;

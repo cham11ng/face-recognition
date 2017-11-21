@@ -27,8 +27,12 @@ class FaceMess {
     return canvasObject;
   }
 
-  triggerWebCam() {
-    this.webcam.isActive ? this.webcam.stop() : this.webcam.start(this.context);
+  startWebCam() {
+    this.webcam.start(this.context);
+  }
+
+  stopWebCam() {
+    this.webcam.stop();
   }
 
   generateHistogramValue() {
@@ -36,7 +40,7 @@ class FaceMess {
   }
 
   capture() {
-    this.capturedContext.drawImage(this.canvas, 0, 0, utils.WIDTH, utils.HEIGHT);
+    this.capturedContext.drawImage(this.canvas, 0, 0);
     this.extractFeature();
     this.generateHistogramValue();
   }
@@ -45,9 +49,9 @@ class FaceMess {
     let image = new Image();
     image.src = src;
     image.onload = () => {
-      this.capturedContext.drawImage(image, 0, 0, this.height, this.width);
+      this.capturedContext.drawImage(image, (this.width - utils.CAMERA_WIDTH) / 2, (this.height - utils.CAMERA_HEIGHT) / 2, this.height, this.width);
       this.extractFeature();
-      // this.generateHistogramValue();
+      this.generateHistogramValue();
     };
   }
 

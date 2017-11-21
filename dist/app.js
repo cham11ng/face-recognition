@@ -78,8 +78,10 @@ exports.get1DPosition = get1DPosition;
 exports.getCoordinate = getCoordinate;
 var POINT_8 = exports.POINT_8 = 8;
 var RADIUS_1 = exports.RADIUS_1 = 1;
-var WIDTH = exports.WIDTH = 640;
-var HEIGHT = exports.HEIGHT = 480;
+var CAMERA_WIDTH = exports.CAMERA_WIDTH = 640;
+var CAMERA_HEIGHT = exports.CAMERA_HEIGHT = 480;
+var CANVAS_WIDTH = exports.CANVAS_WIDTH = 480;
+var CANVAS_HEIGHT = exports.CANVAS_HEIGHT = 480;
 var NEIGHBOUR_SHIFT = exports.NEIGHBOUR_SHIFT = 3;
 var RGBA_SHIFT = exports.RGBA_SHIFT = 4;
 var UNIFORM_BINARY_PATTERN = exports.UNIFORM_BINARY_PATTERN = ['non', 0, 1, 2, 3, 4, 6, 7, 8, 12, 14, 15, 16, 24, 28, 30, 31, 32, 48, 56, 60, 62, 63, 64, 96, 112, 120, 124, 126, 127, 128, 129, 131, 135, 143, 159, 191, 192, 193, 195, 199, 207, 223, 224, 225, 227, 231, 239, 240, 241, 243, 247, 248, 249, 251, 252, 253, 254, 255];
@@ -127,9 +129,16 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 // let canvas = FaceMess.createWithImage('canvas', 'images/cham11ng.jpg');
 
 var faceMess = _FaceMess2.default.createById('canvas');
+var webCamIcon = document.querySelector('#webCam .fa');
 
-faceMess.canvas.addEventListener('click', function () {
-  faceMess.triggerWebCam();
+document.getElementById('webCam').addEventListener('click', function () {
+  if (faceMess.webcam.isActive) {
+    faceMess.stopWebCam();
+    webCamIcon.setAttribute('class', 'fa fa-play fa-2x');
+  } else {
+    faceMess.startWebCam();
+    webCamIcon.setAttribute('class', 'fa fa-pause fa-2x');
+  }
 });
 
 document.getElementById('capture').addEventListener('click', function () {
@@ -187,9 +196,14 @@ var FaceMess = function () {
   }
 
   _createClass(FaceMess, [{
-    key: "triggerWebCam",
-    value: function triggerWebCam() {
-      this.webcam.isActive ? this.webcam.stop() : this.webcam.start(this.context);
+    key: "startWebCam",
+    value: function startWebCam() {
+      this.webcam.start(this.context);
+    }
+  }, {
+    key: "stopWebCam",
+    value: function stopWebCam() {
+      this.webcam.stop();
     }
   }, {
     key: "generateHistogramValue",
@@ -199,7 +213,7 @@ var FaceMess = function () {
   }, {
     key: "capture",
     value: function capture() {
-      this.capturedContext.drawImage(this.canvas, 0, 0, utils.WIDTH, utils.HEIGHT);
+      this.capturedContext.drawImage(this.canvas, 0, 0);
       this.extractFeature();
       this.generateHistogramValue();
     }
@@ -211,9 +225,9 @@ var FaceMess = function () {
       var image = new Image();
       image.src = src;
       image.onload = function () {
-        _this.capturedContext.drawImage(image, 0, 0, _this.height, _this.width);
+        _this.capturedContext.drawImage(image, (_this.width - utils.CAMERA_WIDTH) / 2, (_this.height - utils.CAMERA_HEIGHT) / 2, _this.height, _this.width);
         _this.extractFeature();
-        // this.generateHistogramValue();
+        _this.generateHistogramValue();
       };
     }
   }, {
@@ -281,6 +295,12 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _Utils = __webpack_require__(0);
+
+var utils = _interopRequireWildcard(_Utils);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var WebCam = function () {
@@ -309,7 +329,7 @@ var WebCam = function () {
         console.log(error);
       });
       var draw = function draw(video) {
-        context.drawImage(video, 0, 0);
+        context.drawImage(video, (utils.CANVAS_WIDTH - utils.CAMERA_WIDTH) / 2, (utils.CANVAS_HEIGHT - utils.CAMERA_HEIGHT) / 2);
         _this.cameraTimeout = setTimeout(draw, 10, video, context);
       };
       this.isActive = true;
