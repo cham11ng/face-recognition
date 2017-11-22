@@ -6,32 +6,46 @@ class Histogram {
     for (let i = 0, binLength = bins.length; i < binLength; i++) {
       histogram.push({
         'bin': bins[i],
-        'frequency': 0
+        'frequency': 0,
+        'normalized': 0
       });
     }
     return histogram;
   }
 
   static uniformBinary(imageData) {
-    let nonUniformCount = 0;
     let data = imageData.data;
     let histogram = this.init(utils.UNIFORM_BINARY_PATTERN);
     for (let i = 0, dataLength = data.length; i < dataLength; i += 4) {
       let isNotUniform = true;
       for (let j = 1, uniformLength = utils.UNIFORM_BINARY_PATTERN.length; j < uniformLength; j++) {
         if (utils.UNIFORM_BINARY_PATTERN[j] === data[i]) {
-          histogram[j].frequency++;
+          this.incrementHistogramFrequency(histogram, j, dataLength);
           isNotUniform = false;
           break;
         }
       }
       if (isNotUniform) {
-        nonUniformCount++;
+        this.incrementHistogramFrequency(histogram, 0, dataLength);
       }
     }
-    histogram[0].frequency = nonUniformCount;
+    // console.log(this.isNormalized(histogram, data.length));
 
     return histogram;
+  }
+
+  static incrementHistogramFrequency(histogram, index, dataLength) {
+    histogram[index].frequency++;
+    histogram[index].normalized = histogram[index].frequency / (dataLength / 4);
+  }
+
+  static isNormalized(histogram, dataLength) {
+    let totalFrequencies = 0, totalNormalizedValue = 0;
+    for (let k = 0; k < histogram.length; k++) {
+      totalFrequencies += histogram[k].frequency;
+      totalNormalizedValue += histogram[k].normalized;
+    }
+    return (totalFrequencies === dataLength / 4) && Math.round(totalNormalizedValue) === 1;
   }
 }
 

@@ -403,7 +403,8 @@ var Histogram = function () {
       for (var i = 0, binLength = bins.length; i < binLength; i++) {
         histogram.push({
           'bin': bins[i],
-          'frequency': 0
+          'frequency': 0,
+          'normalized': 0
         });
       }
       return histogram;
@@ -411,25 +412,41 @@ var Histogram = function () {
   }, {
     key: 'uniformBinary',
     value: function uniformBinary(imageData) {
-      var nonUniformCount = 0;
       var data = imageData.data;
       var histogram = this.init(utils.UNIFORM_BINARY_PATTERN);
       for (var i = 0, dataLength = data.length; i < dataLength; i += 4) {
         var isNotUniform = true;
         for (var j = 1, uniformLength = utils.UNIFORM_BINARY_PATTERN.length; j < uniformLength; j++) {
           if (utils.UNIFORM_BINARY_PATTERN[j] === data[i]) {
-            histogram[j].frequency++;
+            this.incrementHistogramFrequency(histogram, j, dataLength);
             isNotUniform = false;
             break;
           }
         }
         if (isNotUniform) {
-          nonUniformCount++;
+          this.incrementHistogramFrequency(histogram, 0, dataLength);
         }
       }
-      histogram[0].frequency = nonUniformCount;
+      // console.log(this.isNormalized(histogram, data.length));
 
       return histogram;
+    }
+  }, {
+    key: 'incrementHistogramFrequency',
+    value: function incrementHistogramFrequency(histogram, index, dataLength) {
+      histogram[index].frequency++;
+      histogram[index].normalized = histogram[index].frequency / (dataLength / 4);
+    }
+  }, {
+    key: 'isNormalized',
+    value: function isNormalized(histogram, dataLength) {
+      var totalFrequencies = 0,
+          totalNormalizedValue = 0;
+      for (var k = 0; k < histogram.length; k++) {
+        totalFrequencies += histogram[k].frequency;
+        totalNormalizedValue += histogram[k].normalized;
+      }
+      return totalFrequencies === dataLength / 4 && Math.round(totalNormalizedValue) === 1;
     }
   }]);
 
