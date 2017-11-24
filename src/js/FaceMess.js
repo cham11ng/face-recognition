@@ -1,6 +1,7 @@
 import WebCam from "./WebCam";
 import Histogram from "./Histogram";
 import ImageProcessor from "./ImageProcessor";
+import * as utils from "./Utils";
 
 class FaceMess {
   constructor(canvas) {
@@ -40,6 +41,7 @@ class FaceMess {
   }
 
   generateHistogramValue() {
+    console.log(Histogram.compareHistogram(Histogram.uniformBinary(ImageProcessor.getImageData(this.capturedCanvas)), utils.TRAINED_DATA['cham11ng']));
     console.log(Histogram.uniformBinary(ImageProcessor.getImageData(this.capturedCanvas)));
   }
 
@@ -51,7 +53,7 @@ class FaceMess {
       this.capturedContext.clearRect(0, 0, this.width, this.height);
       this.capturedContext.drawImage(image, 0, (this.height - image.height * scale) / 2, this.width, image.height * scale);
       ImageProcessor.extractFeature(this.capturedCanvas);
-      this.generateHistogramValue();
+      // this.generateHistogramValue();
     };
   }
 

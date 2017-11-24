@@ -39,6 +39,20 @@ class Histogram {
     histogram[index].normalized = histogram[index].frequency / (dataLength / 4);
   }
 
+  static compareHistogram(firstHistogram, secondHistogram) {
+    return this.chiSquare(firstHistogram, secondHistogram);
+  }
+
+  static chiSquare(firstHistogram, secondHistogram) {
+    let total = firstHistogram.length;
+    let sum = 0;
+    for (let i = 0; i < total; i++) {
+      sum += Math.pow((firstHistogram[i].normalized - secondHistogram[i].normalized), 2) / secondHistogram[i].normalized;
+    }
+
+    return sum;
+  }
+
   static isNormalized(histogram, dataLength) {
     let totalFrequencies = 0, totalNormalizedValue = 0;
     for (let k = 0; k < histogram.length; k++) {

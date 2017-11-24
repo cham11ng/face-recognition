@@ -21,6 +21,6 @@ document.getElementById('webCam').addEventListener('click', () => {
   }
 });
 
-/*document.getElementById('capture').addEventListener('click', () => {
+document.getElementById('capture').addEventListener('click', () => {
   faceMess.capture();
-});*/
+});

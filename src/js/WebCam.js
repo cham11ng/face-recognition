@@ -34,7 +34,7 @@ class WebCam {
       context.restore();
       capturedContext.drawImage(canvas, 0, 0);
       ImageProcessor.extractFeature(capturedCanvas);
-      Histogram.uniformBinary(ImageProcessor.getImageData(capturedCanvas));
+      this.compareFeature(capturedCanvas);
       this.cameraTimeout = setTimeout(draw, 100, video, context);
     };
     this.isActive = true;
@@ -44,6 +44,17 @@ class WebCam {
     clearTimeout(this.cameraTimeout);
     this.stream.getTracks()[0].stop();
     this.isActive = false;
+  }
+
+  compareFeature(canvas) {
+    let observedHistogram = Histogram.uniformBinary(ImageProcessor.getImageData(canvas));
+    for (let key in utils.TRAINED_DATA) {
+      if (utils.TRAINED_DATA.hasOwnProperty(key) && Histogram.compareHistogram(observedHistogram, utils.TRAINED_DATA[key]) <= utils.CHI_RECOGNITION_THRESHOLD) {
+        console.log(key);
+        this.stop();
+        break;
+      }
+    }
   }
 }
 
