@@ -1,4 +1,5 @@
 import * as utils from "./Utils";
+import ImageProcessor from "./ImageProcessor";
 
 class Histogram {
   static init(bins) {
@@ -60,6 +61,25 @@ class Histogram {
       totalNormalizedValue += histogram[k].normalized;
     }
     return (totalFrequencies === dataLength / 4) && Math.round(totalNormalizedValue) === 1;
+  }
+
+  static compareFeature(canvas) {
+    let observedHistogram = Histogram.uniformBinary(ImageProcessor.getImageData(canvas));
+    let maxMATCH = {
+      value: 1,
+      name: ''
+    };
+    for (let key in utils.TRAINED_DATA) {
+      if (utils.TRAINED_DATA.hasOwnProperty(key)) {
+        let difference = Histogram.compareHistogram(observedHistogram, utils.TRAINED_DATA[key]);
+        if (difference <= maxMATCH['value']) {
+          maxMATCH.name = key;
+          maxMATCH.value = difference;
+        }
+      }
+    }
+
+    return maxMATCH;
   }
 }
 

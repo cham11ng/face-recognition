@@ -12,7 +12,7 @@ class WebCam {
     this.video = document.createElement('video');
   }
 
-  start(canvas, capturedCanvas) {
+  start(canvas, capturedCanvas, nameCanvas) {
     let context = canvas.getContext("2d");
     let capturedContext = capturedCanvas.getContext("2d");
     let positionX = (this.scaleH === 1 ? 0 : utils.CANVAS_WIDTH * -1) + (utils.CANVAS_WIDTH - utils.CAMERA_WIDTH) / 2;
@@ -34,7 +34,12 @@ class WebCam {
       context.restore();
       capturedContext.drawImage(canvas, 0, 0);
       ImageProcessor.extractFeature(capturedCanvas);
-      this.compareFeature(capturedCanvas);
+      let maxMatch = Histogram.compareFeature(capturedCanvas);
+
+      if (maxMatch.value <= utils.CHI_RECOGNITION_THRESHOLD) {
+        ImageProcessor.drawOutput(nameCanvas, maxMatch.name);
+      }
+
       this.cameraTimeout = setTimeout(draw, 100, video, context);
     };
     this.isActive = true;
@@ -44,17 +49,6 @@ class WebCam {
     clearTimeout(this.cameraTimeout);
     this.stream.getTracks()[0].stop();
     this.isActive = false;
-  }
-
-  compareFeature(canvas) {
-    let observedHistogram = Histogram.uniformBinary(ImageProcessor.getImageData(canvas));
-    for (let key in utils.TRAINED_DATA) {
-      if (utils.TRAINED_DATA.hasOwnProperty(key) && Histogram.compareHistogram(observedHistogram, utils.TRAINED_DATA[key]) <= utils.CHI_RECOGNITION_THRESHOLD) {
-        console.log(key);
-        this.stop();
-        break;
-      }
-    }
   }
 }
 

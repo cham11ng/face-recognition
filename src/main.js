@@ -5,12 +5,6 @@ let canvas = FaceMess.createWithImage('canvas', 'images/lenna.png');
 let faceMess = FaceMess.createById('canvas');
 let webCamIcon = document.querySelector('#webCam .fa');
 
-document.getElementById("fileSelector").addEventListener("change", function () {
-  let files = this.files;
-  if (files.length)
-    faceMess.handleLocalFile(files[0]);
-});
-
 document.getElementById('webCam').addEventListener('click', () => {
   if (faceMess.webcam.isActive) {
     faceMess.stopWebCam();

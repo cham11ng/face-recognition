@@ -59,6 +59,15 @@ class ImageProcessor {
   static getGrayScaleValue(data, position) {
     return data[position] * 0.3 + data[position + 1] * 0.59 + data[position + 2] * 0.11;
   }
+
+  static drawOutput(canvas, name) {
+    let context = canvas.getContext("2d");
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.font = 'bold 18pt Calibri';
+    context.textAlign = 'center';
+    context.fillText("You're", canvas.width / 2, canvas.height / 2 - 20);
+    context.fillText(name, canvas.width / 2, canvas.height / 2 + 20);
+  }
 }
 
 export default ImageProcessor;

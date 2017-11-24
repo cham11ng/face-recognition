@@ -10,6 +10,8 @@ class FaceMess {
     this.width = this.canvas.width;
     this.height = this.canvas.height;
     this.context = this.canvas.getContext('2d');
+    this.nameCanvas = document.getElementById('name');
+    this.nameContext = this.nameCanvas.getContext('2d');
     this.capturedCanvas = document.getElementById('capturedImage');
     this.capturedContext = this.capturedCanvas.getContext('2d');
   }
@@ -26,7 +28,7 @@ class FaceMess {
   }
 
   startWebCam() {
-    this.webcam.start(this.canvas, this.capturedCanvas);
+    this.webcam.start(this.canvas, this.capturedCanvas, this.nameCanvas);
   }
 
   stopWebCam() {
@@ -41,8 +43,8 @@ class FaceMess {
   }
 
   generateHistogramValue() {
-    /*console.log(Histogram.compareHistogram(Histogram.uniformBinary(ImageProcessor.getImageData(this.capturedCanvas)), utils.TRAINED_DATA['Sagar Chamling']));
-    console.log(Histogram.uniformBinary(ImageProcessor.getImageData(this.capturedCanvas)));*/
+    console.log(Histogram.compareHistogram(Histogram.uniformBinary(ImageProcessor.getImageData(this.capturedCanvas)), utils.TRAINED_DATA['Sagar Chamling']));
+    console.log(Histogram.uniformBinary(ImageProcessor.getImageData(this.capturedCanvas)));
   }
 
   browseImage(src) {
