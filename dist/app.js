@@ -79,9 +79,12 @@ exports.getCoordinate = getCoordinate;
 var POINT_8 = exports.POINT_8 = 8;
 var RADIUS_1 = exports.RADIUS_1 = 1;
 var CAMERA_WIDTH = exports.CAMERA_WIDTH = 640;
-var CAMERA_HEIGHT = exports.CAMERA_HEIGHT = 480;
-var CANVAS_WIDTH = exports.CANVAS_WIDTH = 480;
-var CANVAS_HEIGHT = exports.CANVAS_HEIGHT = 480;
+var CAMERA_HEIGHT = exports.CAMERA_HEIGHT = 180;
+var CANVAS_WIDTH = exports.CANVAS_WIDTH = 180;
+var CANVAS_HEIGHT = exports.CANVAS_HEIGHT = 180;
+var FACE_WIDTH = exports.FACE_WIDTH = 180;
+var FACE_HEIGHT = exports.FACE_HEIGHT = 180;
+var FACE_FRAME = exports.FACE_FRAME = [(CANVAS_WIDTH - FACE_WIDTH) / 2, (CANVAS_HEIGHT - FACE_HEIGHT) / 2, FACE_WIDTH, FACE_HEIGHT];
 var NEIGHBOUR_SHIFT = exports.NEIGHBOUR_SHIFT = 3;
 var RGBA_SHIFT = exports.RGBA_SHIFT = 4;
 var UNIFORM_BINARY_PATTERN = exports.UNIFORM_BINARY_PATTERN = ['non', 0, 1, 2, 3, 4, 6, 7, 8, 12, 14, 15, 16, 24, 28, 30, 31, 32, 48, 56, 60, 62, 63, 64, 96, 112, 120, 124, 126, 127, 128, 129, 131, 135, 143, 159, 191, 192, 193, 195, 199, 207, 223, 224, 225, 227, 231, 239, 240, 241, 243, 247, 248, 249, 251, 252, 253, 254, 255];
@@ -146,9 +149,9 @@ document.getElementById('webCam').addEventListener('click', function () {
   }
 });
 
-document.getElementById('capture').addEventListener('click', function () {
+/*document.getElementById('capture').addEventListener('click', () => {
   faceMess.capture();
-});
+});*/
 
 /***/ }),
 /* 3 */
@@ -167,10 +170,6 @@ var _WebCam = __webpack_require__(4);
 
 var _WebCam2 = _interopRequireDefault(_WebCam);
 
-var _Utils = __webpack_require__(0);
-
-var utils = _interopRequireWildcard(_Utils);
-
 var _Histogram = __webpack_require__(5);
 
 var _Histogram2 = _interopRequireDefault(_Histogram);
@@ -178,8 +177,6 @@ var _Histogram2 = _interopRequireDefault(_Histogram);
 var _ImageProcessor = __webpack_require__(6);
 
 var _ImageProcessor2 = _interopRequireDefault(_ImageProcessor);
-
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -194,8 +191,6 @@ var FaceMess = function () {
     this.width = this.canvas.width;
     this.height = this.canvas.height;
     this.context = this.canvas.getContext('2d');
-    this.grayScaleCanvas = this.canvas.cloneNode(true);
-    this.grayScaleContext = this.grayScaleCanvas.getContext('2d');
     this.capturedCanvas = document.getElementById('capturedImage');
     this.capturedContext = this.capturedCanvas.getContext('2d');
   }
@@ -203,7 +198,7 @@ var FaceMess = function () {
   _createClass(FaceMess, [{
     key: "startWebCam",
     value: function startWebCam() {
-      this.webcam.start(this.context);
+      this.webcam.start(this.canvas, this.capturedCanvas);
     }
   }, {
     key: "stopWebCam",
@@ -211,16 +206,17 @@ var FaceMess = function () {
       this.webcam.stop();
     }
   }, {
+    key: "capture",
+    value: function capture() {
+      this.capturedContext.clearRect(0, 0, this.width, this.height);
+      this.capturedContext.drawImage(this.canvas, 0, 0);
+      _ImageProcessor2.default.extractFeature(this.capturedCanvas);
+      this.generateHistogramValue();
+    }
+  }, {
     key: "generateHistogramValue",
     value: function generateHistogramValue() {
       console.log(_Histogram2.default.uniformBinary(_ImageProcessor2.default.getImageData(this.capturedCanvas)));
-    }
-  }, {
-    key: "capture",
-    value: function capture() {
-      this.capturedContext.drawImage(this.canvas, 0, 0);
-      this.extractFeature();
-      this.generateHistogramValue();
     }
   }, {
     key: "browseImage",
@@ -233,7 +229,7 @@ var FaceMess = function () {
         var scale = _this.width / image.width;
         _this.capturedContext.clearRect(0, 0, _this.width, _this.height);
         _this.capturedContext.drawImage(image, 0, (_this.height - image.height * scale) / 2, _this.width, image.height * scale);
-        _this.extractFeature();
+        _ImageProcessor2.default.extractFeature(_this.capturedCanvas);
         _this.generateHistogramValue();
       };
     }
@@ -243,39 +239,6 @@ var FaceMess = function () {
       if (file.type.match(/image.*/)) {
         this.browseImage(window.URL.createObjectURL(file));
       }
-    }
-  }, {
-    key: "extractFeature",
-    value: function extractFeature() {
-      var imageData = _ImageProcessor2.default.getImageData(this.capturedCanvas);
-      this.grayScaleContext.drawImage(this.capturedCanvas, 0, 0);
-      var grayScaleData = _ImageProcessor2.default.rgbCanvas2grey(this.grayScaleCanvas);
-      var data = imageData.data;
-
-      for (var y = 1; y < this.height - 1; y++) {
-        for (var x = 1, index = 0; x < this.width - 1; x++, index += 4) {
-          var sum = 0;
-          var neighbourValue = [];
-          var centerPosition = utils.get1DPosition(this.width, x, y) * utils.RGBA_SHIFT;
-          var centerValue = grayScaleData[centerPosition];
-          neighbourValue[7] = grayScaleData[utils.get1DPosition(this.width, x - 1, y - 1) * utils.RGBA_SHIFT] - centerValue;
-          neighbourValue[6] = grayScaleData[utils.get1DPosition(this.width, x, y - 1) * utils.RGBA_SHIFT] - centerValue;
-          neighbourValue[5] = grayScaleData[utils.get1DPosition(this.width, x + 1, y - 1) * utils.RGBA_SHIFT] - centerValue;
-          neighbourValue[4] = grayScaleData[utils.get1DPosition(this.width, x + 1, y) * utils.RGBA_SHIFT] - centerValue;
-          neighbourValue[3] = grayScaleData[utils.get1DPosition(this.width, x + 1, y + 1) * utils.RGBA_SHIFT] - centerValue;
-          neighbourValue[2] = grayScaleData[utils.get1DPosition(this.width, x, y + 1) * utils.RGBA_SHIFT] - centerValue;
-          neighbourValue[1] = grayScaleData[utils.get1DPosition(this.width, x - 1, y + 1) * utils.RGBA_SHIFT] - centerValue;
-          neighbourValue[0] = grayScaleData[utils.get1DPosition(this.width, x - 1, y) * utils.RGBA_SHIFT] - centerValue;
-
-          for (var k = 0, totalNeighbour = neighbourValue.length; k < totalNeighbour; k++) {
-            sum += utils.unitStep(neighbourValue[k]) * Math.pow(2, k);
-          }
-          data[centerPosition] = data[centerPosition + 1] = data[centerPosition + 2] = sum;
-        }
-      }
-
-      this.capturedContext.clearRect(0, 0, this.width, this.height);
-      this.capturedContext.putImageData(imageData, 0, 0);
     }
   }], [{
     key: "createById",
@@ -314,6 +277,16 @@ var _Utils = __webpack_require__(0);
 
 var utils = _interopRequireWildcard(_Utils);
 
+var _Histogram = __webpack_require__(5);
+
+var _Histogram2 = _interopRequireDefault(_Histogram);
+
+var _ImageProcessor = __webpack_require__(6);
+
+var _ImageProcessor2 = _interopRequireDefault(_ImageProcessor);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -331,10 +304,12 @@ var WebCam = function () {
   }
 
   _createClass(WebCam, [{
-    key: 'start',
-    value: function start(context) {
+    key: "start",
+    value: function start(canvas, capturedCanvas) {
       var _this = this;
 
+      var context = canvas.getContext("2d");
+      var capturedContext = capturedCanvas.getContext("2d");
       var positionX = (this.scaleH === 1 ? 0 : utils.CANVAS_WIDTH * -1) + (utils.CANVAS_WIDTH - utils.CAMERA_WIDTH) / 2;
       var positionY = (this.scaleV === 1 ? 0 : utils.CANVAS_HEIGHT * -1) + (utils.CANVAS_HEIGHT - utils.CAMERA_HEIGHT) / 2;
       navigator.getUserMedia({
@@ -352,12 +327,15 @@ var WebCam = function () {
         context.scale(_this.scaleH, _this.scaleV);
         context.drawImage(video, positionX, positionY);
         context.restore();
-        _this.cameraTimeout = setTimeout(draw, 10, video, context);
+        capturedContext.drawImage(canvas, 0, 0);
+        _ImageProcessor2.default.extractFeature(capturedCanvas);
+        _Histogram2.default.uniformBinary(_ImageProcessor2.default.getImageData(capturedCanvas));
+        _this.cameraTimeout = setTimeout(draw, 100, video, context);
       };
       this.isActive = true;
     }
   }, {
-    key: 'stop',
+    key: "stop",
     value: function stop() {
       clearTimeout(this.cameraTimeout);
       this.stream.getTracks()[0].stop();
@@ -468,6 +446,12 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _Utils = __webpack_require__(0);
+
+var utils = _interopRequireWildcard(_Utils);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var ImageProcessor = function () {
@@ -501,6 +485,44 @@ var ImageProcessor = function () {
       var pixel = context.getImageData(x, y, 1, 1);
 
       return pixel.data[0];
+    }
+  }, {
+    key: "extractFeature",
+    value: function extractFeature(canvas) {
+      var context = canvas.getContext('2d');
+      var imageData = ImageProcessor.getImageData(canvas);
+      var data = imageData.data;
+      var backupData = imageData.data.slice();
+
+      for (var y = 1; y < canvas.height - 1; y++) {
+        for (var x = 1, index = 0; x < canvas.width - 1; x++, index += 4) {
+          var sum = 0;
+          var neighbourValue = [];
+          var centerPosition = utils.get1DPosition(canvas.width, x, y) * utils.RGBA_SHIFT;
+          var centerValue = this.getGrayScaleValue(backupData, centerPosition);
+          neighbourValue[7] = this.getGrayScaleValue(backupData, utils.get1DPosition(canvas.width, x - 1, y - 1) * utils.RGBA_SHIFT) - centerValue;
+          neighbourValue[6] = this.getGrayScaleValue(backupData, utils.get1DPosition(canvas.width, x, y - 1) * utils.RGBA_SHIFT) - centerValue;
+          neighbourValue[5] = this.getGrayScaleValue(backupData, utils.get1DPosition(canvas.width, x + 1, y - 1) * utils.RGBA_SHIFT) - centerValue;
+          neighbourValue[4] = this.getGrayScaleValue(backupData, utils.get1DPosition(canvas.width, x + 1, y) * utils.RGBA_SHIFT) - centerValue;
+          neighbourValue[3] = this.getGrayScaleValue(backupData, utils.get1DPosition(canvas.width, x + 1, y + 1) * utils.RGBA_SHIFT) - centerValue;
+          neighbourValue[2] = this.getGrayScaleValue(backupData, utils.get1DPosition(canvas.width, x, y + 1) * utils.RGBA_SHIFT) - centerValue;
+          neighbourValue[1] = this.getGrayScaleValue(backupData, utils.get1DPosition(canvas.width, x - 1, y + 1) * utils.RGBA_SHIFT) - centerValue;
+          neighbourValue[0] = this.getGrayScaleValue(backupData, utils.get1DPosition(canvas.width, x - 1, y) * utils.RGBA_SHIFT) - centerValue;
+
+          for (var k = 0, totalNeighbour = neighbourValue.length; k < totalNeighbour; k++) {
+            sum += utils.unitStep(neighbourValue[k]) * Math.pow(2, k);
+          }
+          data[centerPosition] = data[centerPosition + 1] = data[centerPosition + 2] = sum;
+        }
+      }
+
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      context.putImageData(imageData, 0, 0);
+    }
+  }, {
+    key: "getGrayScaleValue",
+    value: function getGrayScaleValue(data, position) {
+      return data[position] * 0.3 + data[position + 1] * 0.59 + data[position + 2] * 0.11;
     }
   }]);
 

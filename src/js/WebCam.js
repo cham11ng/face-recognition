@@ -1,4 +1,6 @@
 import * as utils from "./Utils";
+import Histogram from "./Histogram";
+import ImageProcessor from "./ImageProcessor";
 
 class WebCam {
   constructor() {
@@ -10,7 +12,9 @@ class WebCam {
     this.video = document.createElement('video');
   }
 
-  start(context) {
+  start(canvas, capturedCanvas) {
+    let context = canvas.getContext("2d");
+    let capturedContext = capturedCanvas.getContext("2d");
     let positionX = (this.scaleH === 1 ? 0 : utils.CANVAS_WIDTH * -1) + (utils.CANVAS_WIDTH - utils.CAMERA_WIDTH) / 2;
     let positionY = (this.scaleV === 1 ? 0 : utils.CANVAS_HEIGHT * -1) + (utils.CANVAS_HEIGHT - utils.CAMERA_HEIGHT) / 2;
     navigator.getUserMedia({
@@ -28,7 +32,10 @@ class WebCam {
       context.scale(this.scaleH, this.scaleV);
       context.drawImage(video, positionX, positionY);
       context.restore();
-      this.cameraTimeout = setTimeout(draw, 10, video, context);
+      capturedContext.drawImage(canvas, 0, 0);
+      ImageProcessor.extractFeature(capturedCanvas);
+      Histogram.uniformBinary(ImageProcessor.getImageData(capturedCanvas));
+      this.cameraTimeout = setTimeout(draw, 100, video, context);
     };
     this.isActive = true;
   }
