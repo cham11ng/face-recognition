@@ -41,8 +41,8 @@ class FaceMess {
   }
 
   generateHistogramValue() {
-    console.log(Histogram.compareHistogram(Histogram.uniformBinary(ImageProcessor.getImageData(this.capturedCanvas)), utils.TRAINED_DATA['cham11ng']));
-    console.log(Histogram.uniformBinary(ImageProcessor.getImageData(this.capturedCanvas)));
+    /*console.log(Histogram.compareHistogram(Histogram.uniformBinary(ImageProcessor.getImageData(this.capturedCanvas)), utils.TRAINED_DATA['Sagar Chamling']));
+    console.log(Histogram.uniformBinary(ImageProcessor.getImageData(this.capturedCanvas)));*/
   }
 
   browseImage(src) {

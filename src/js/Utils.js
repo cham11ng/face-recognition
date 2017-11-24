@@ -30,7 +30,7 @@ export function getCoordinate(colLength, position) {
   };
 }
 
-export const CHI_RECOGNITION_THRESHOLD = 0.015;
+export const CHI_RECOGNITION_THRESHOLD = 0.02;
 export const TRAINED_DATA = {
   "Sagar Chamling": [
     {bin: "non", frequency: 3740, normalized: 0.1154320987654321},
