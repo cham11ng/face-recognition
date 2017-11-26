@@ -1,5 +1,5 @@
 # FaceMess
-Face Detection using Local Binary Pattern (LBP)
+Face Recognition using Local Binary Pattern (LBP)
 
 ## Requirement
 * Node (v8.9.1)
@@ -7,7 +7,7 @@ Face Detection using Local Binary Pattern (LBP)
 * Yarn (v1.3.2)
 
 ## Installation
-* `git clone git@github.com:cham11ng/face-mess.git`
+* `git clone git@github.com:cham11ng/face-recognition.git`
 * `yarn install`
 * `yarn run build`
 

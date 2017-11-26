@@ -1,8 +1,8 @@
 {
-  "name": "face-mess",
+  "name": "face-recognition",
   "version": "0.1.0",
   "main": "main.js",
-  "repository": "git@github.com:cham11ng/face-mess.git",
+  "repository": "git@github.com:cham11ng/face-recognition.git",
   "author": "Sagar Chamling <sgr.raee@gmail.com>",
   "license": "MIT",
   "devDependencies": {

@@ -1,8 +1,8 @@
 import FaceMess from './js/FaceMess';
 
-let canvas = FaceMess.createWithImage('canvas', 'images/lenna.png');
+FaceMess.createWithImage('camera', 'images/lenna.png');
 
-let faceMess = FaceMess.createById('canvas');
+let faceMess = FaceMess.createById('camera');
 let webCamIcon = document.querySelector('#webCam .fa');
 
 document.getElementById('webCam').addEventListener('click', () => {

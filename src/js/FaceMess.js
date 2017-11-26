@@ -1,23 +1,23 @@
 import WebCam from "./WebCam";
-import Histogram from "./Histogram";
-import ImageProcessor from "./ImageProcessor";
 import * as utils from "./Utils";
+import ImageProcessor from "./ImageProcessor";
 
 class FaceMess {
   constructor(canvas) {
     this.canvas = canvas;
-    this.webcam = new WebCam();
     this.width = this.canvas.width;
     this.height = this.canvas.height;
-    this.context = this.canvas.getContext('2d');
-    this.nameCanvas = document.getElementById('name');
-    this.nameContext = this.nameCanvas.getContext('2d');
     this.capturedCanvas = document.getElementById('capturedImage');
-    this.capturedContext = this.capturedCanvas.getContext('2d');
+    this.capturedCanvas.width = utils.CAPTURE_WIDTH;
+    this.capturedCanvas.height = utils.CAPTURE_HEIGHT;
+    this.webcam = new WebCam(this.canvas, this.capturedCanvas);
   }
 
   static createById(id) {
-    return new FaceMess(document.getElementById(id));
+    let canvas = document.getElementById(id);
+    canvas.height = utils.CANVAS_HEIGHT;
+    canvas.width = utils.CANVAS_WIDTH;
+    return new FaceMess(canvas);
   }
 
   static createWithImage(id, src) {
@@ -28,7 +28,7 @@ class FaceMess {
   }
 
   startWebCam() {
-    this.webcam.start(this.canvas, this.capturedCanvas, this.nameCanvas);
+    this.webcam.start();
   }
 
   stopWebCam() {
@@ -36,26 +36,19 @@ class FaceMess {
   }
 
   capture() {
-    this.capturedContext.clearRect(0, 0, this.width, this.height);
-    this.capturedContext.drawImage(this.canvas, 0, 0);
-    ImageProcessor.extractFeature(this.capturedCanvas);
-    this.generateHistogramValue();
-  }
-
-  generateHistogramValue() {
-    console.log(Histogram.compareHistogram(Histogram.uniformBinary(ImageProcessor.getImageData(this.capturedCanvas)), utils.TRAINED_DATA['Sagar Chamling']));
-    console.log(Histogram.uniformBinary(ImageProcessor.getImageData(this.capturedCanvas)));
+    this.webcam.capture();
+    this.webcam.stop();
   }
 
   browseImage(src) {
     let image = new Image();
     image.src = src;
     image.onload = () => {
-      let scale = this.width / image.width;
-      this.capturedContext.clearRect(0, 0, this.width, this.height);
-      this.capturedContext.drawImage(image, 0, (this.height - image.height * scale) / 2, this.width, image.height * scale);
+      let scale = utils.CAPTURE_WIDTH / image.width;
+      let context = this.capturedCanvas.getContext('2d');
+      context.clearRect(0, 0, utils.CAPTURE_WIDTH, utils.CAPTURE_HEIGHT);
+      context.drawImage(image, 0, (utils.CAPTURE_HEIGHT - image.height * scale) / 2, utils.CAPTURE_WIDTH, image.height * scale);
       ImageProcessor.extractFeature(this.capturedCanvas);
-      // this.generateHistogramValue();
     };
   }
 

@@ -1,8 +1,12 @@
 import * as utils from "./Utils";
+import Histogram from "./Histogram";
+import {FACE_DATA} from "./Data";
 
 class ImageProcessor {
-  static getImageData(canvas) {
-    return canvas.getContext("2d").getImageData(0, 0, canvas.width, canvas.height);
+  static getImageData(canvas, ...parameters) {
+    return parameters.length === 4
+      ? canvas.getContext("2d").getImageData(...parameters)
+      : canvas.getContext("2d").getImageData(0, 0, canvas.width, canvas.height);
   }
 
   static rgb2gray(data) {
@@ -26,7 +30,7 @@ class ImageProcessor {
 
   static extractFeature(canvas) {
     let context = canvas.getContext('2d');
-    let imageData = ImageProcessor.getImageData(canvas);
+    let imageData = this.getImageData(canvas);
     let data = imageData.data;
     let backupData = imageData.data.slice();
 
@@ -60,13 +64,38 @@ class ImageProcessor {
     return data[position] * 0.3 + data[position + 1] * 0.59 + data[position + 2] * 0.11;
   }
 
-  static drawOutput(canvas, name) {
+  static evaluateRecognition(canvas) {
+    this.extractFeature(canvas);
+    let observedHistogram = Histogram.uniformBinary(ImageProcessor.getImageData(canvas));
+    let maxMatch = {
+      value: 1,
+      name: ''
+    };
+    for (let key in FACE_DATA) {
+      if (FACE_DATA.hasOwnProperty(key)) {
+        let difference = Histogram.compareHistogram(utils.valuesArray(observedHistogram, 'normalized'), FACE_DATA[key]);
+        if (difference < maxMatch.value) {
+          maxMatch.name = key;
+          maxMatch.value = difference;
+        }
+      }
+    }
+
+    if (maxMatch.value < utils.CHI_RECOGNITION_DOF) {
+      this.displayOutput(maxMatch);
+    }
+  }
+
+  static displayOutput(maxMatch) {
+    console.log(maxMatch.name, maxMatch.value);
+    /*
     let context = canvas.getContext("2d");
     context.clearRect(0, 0, canvas.width, canvas.height);
     context.font = 'bold 18pt Calibri';
     context.textAlign = 'center';
     context.fillText("You're", canvas.width / 2, canvas.height / 2 - 20);
     context.fillText(name, canvas.width / 2, canvas.height / 2 + 20);
+    */
   }
 }
 

@@ -1,3 +1,4 @@
+import {FACE_DATA} from "./Data";
 import * as utils from "./Utils";
 import ImageProcessor from "./ImageProcessor";
 
@@ -48,7 +49,7 @@ class Histogram {
     let total = firstHistogram.length;
     let sum = 0;
     for (let i = 0; i < total; i++) {
-      sum += Math.pow((firstHistogram[i].normalized - secondHistogram[i].normalized), 2) / secondHistogram[i].normalized;
+      sum += Math.pow((firstHistogram[i] - secondHistogram[i]), 2) / secondHistogram[i];
     }
 
     return sum;
@@ -56,30 +57,16 @@ class Histogram {
 
   static isNormalized(histogram, dataLength) {
     let totalFrequencies = 0, totalNormalizedValue = 0;
-    for (let k = 0; k < histogram.length; k++) {
+    for (let k = 1; k < histogram.length; k++) {
       totalFrequencies += histogram[k].frequency;
       totalNormalizedValue += histogram[k].normalized;
     }
     return (totalFrequencies === dataLength / 4) && Math.round(totalNormalizedValue) === 1;
   }
 
-  static compareFeature(canvas) {
-    let observedHistogram = Histogram.uniformBinary(ImageProcessor.getImageData(canvas));
-    let maxMATCH = {
-      value: 1,
-      name: ''
-    };
-    for (let key in utils.TRAINED_DATA) {
-      if (utils.TRAINED_DATA.hasOwnProperty(key)) {
-        let difference = Histogram.compareHistogram(observedHistogram, utils.TRAINED_DATA[key]);
-        if (difference <= maxMATCH['value']) {
-          maxMATCH.name = key;
-          maxMATCH.value = difference;
-        }
-      }
-    }
-
-    return maxMATCH;
+  static generateHistogramValue(canvas) {
+    console.log(this.compareHistogram(utils.valuesArray(this.uniformBinary(ImageProcessor.getImageData(canvas)), 'normalized'), FACE_DATA['Sagar Chamling']));
+    console.log(utils.valuesArray(this.uniformBinary(ImageProcessor.getImageData(canvas)), 'normalized'));
   }
 }
 

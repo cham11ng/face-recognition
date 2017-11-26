@@ -2,12 +2,6 @@
 @import "scss/variables";
 @import "node_modules/font-awesome/scss/font-awesome";
 
-canvas {
-  margin: 10px;
-  border: 10px solid $border-default;
-  box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.12), 0 1px 5px 0 rgba(0, 0, 0, 0.2);
-}
-
 .wrapper {
   height: 100vh;
   display: flex;
@@ -21,19 +15,31 @@ canvas {
   position: relative;
 }
 
-input#fileSelector {
+.border-style {
+  border: 10px solid $border-default;
+  box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.12), 0 1px 5px 0 rgba(0, 0, 0, 0.2);
+}
+
+#camera, #capturedImage {
+  @extend .border-style
+}
+
+#capturedImage {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 50%;
-  height: 100%;
-  opacity: 0;
-  cursor: pointer;
+  left: (480 - 180) / (2 * 480) * 100%;
+  bottom: -75px;
+  text-align: center;
+  display: block;
+}
+
+.pattern {
+  position: absolute;
+  left: 10px;
 }
 
 .control {
-  right: 10px;
   position: absolute;
+  right: 10px;
 }
 
 .button {
