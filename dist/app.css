@@ -2375,4 +2375,17 @@
 .button:hover {
   background-color: #eeeeee; }
 
+.name {
+  position: absolute;
+  text-align: center; }
+
+.name input {
+  height: 30px;
+  width: 580px;
+  padding: 20px;
+  font-size: 28pt;
+  text-align: center;
+  border-radius: 10px;
+  display: none; }
+
 /*# sourceMappingURL=app.css.map*/

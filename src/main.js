@@ -16,5 +16,17 @@ document.getElementById('webCam').addEventListener('click', () => {
 });
 
 document.getElementById('capture').addEventListener('click', () => {
-  faceMess.capture();
+  if (faceMess.webcam.isActive) {
+    let input = document.querySelector('.name input');
+    faceMess.stopWebCam();
+    webCamIcon.setAttribute('class', 'fa fa-play fa-2x');
+    input.style.display = 'block';
+    input.onkeydown = (event) => {
+      if (event.keyCode === 13) { // Enter
+        faceMess.capture(input.value);
+        input.style.display = 'none';
+        input.value = '';
+      }
+    }
+  }
 });

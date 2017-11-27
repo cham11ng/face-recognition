@@ -45,11 +45,11 @@ class WebCam {
     this.isActive = false;
   }
 
-  capture() {
+  capture(name) {
     this.capturedContext.clearRect(0, 0, this.capturedCanvas.width, this.capturedCanvas.height);
     this.capturedContext.drawImage(this.canvas, ...utils.FACE_FRAME, 0, 0, this.capturedCanvas.width, this.capturedCanvas.height);
-    this.drawOutput(ImageProcessor.evaluateRecognition(this.capturedCanvas));
-    Histogram.generateHistogramValue(this.capturedCanvas);
+    ImageProcessor.extractFeature(this.capturedCanvas);
+    Histogram.generateHistogramValue(this.capturedCanvas, name);
   }
 
   /**

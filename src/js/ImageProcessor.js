@@ -1,6 +1,7 @@
+import Session from "./Session";
+import {FACE_DATA} from "./Data";
 import * as utils from "./Utils";
 import Histogram from "./Histogram";
-import {FACE_DATA} from "./Data";
 
 class ImageProcessor {
   static getImageData(canvas, ...parameters) {
@@ -71,18 +72,23 @@ class ImageProcessor {
       value: 1,
       name: 'Unknown'
     };
-    for (let key in FACE_DATA) {
-      if (FACE_DATA.hasOwnProperty(key)) {
-        let difference = Histogram.compareHistogram(utils.valuesArray(observedHistogram, 'normalized'), FACE_DATA[key]);
+
+    ImageProcessor.compareWithData(observedHistogram, Object.assign({}, Session.get('data'), FACE_DATA), maxMatch);
+
+    if (maxMatch.value < utils.CHI_RECOGNITION_DOF) {
+      return maxMatch;
+    }
+  }
+
+  static compareWithData(relativeData, data, maxMatch) {
+    for (let key in data) {
+      if (data.hasOwnProperty(key)) {
+        let difference = Histogram.compareHistogram(utils.valuesArray(relativeData, 'normalized'), data[key]);
         if (difference < maxMatch.value) {
           maxMatch.name = key;
           maxMatch.value = difference;
         }
       }
-    }
-
-    if (maxMatch.value < utils.CHI_RECOGNITION_DOF) {
-      return maxMatch;
     }
   }
 }

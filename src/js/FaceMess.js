@@ -35,9 +35,8 @@ class FaceMess {
     this.webcam.stop();
   }
 
-  capture() {
-    this.webcam.capture();
-    this.webcam.stop();
+  capture(name) {
+    this.webcam.capture(name);
   }
 
   browseImage(src) {

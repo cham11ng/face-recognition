@@ -1,4 +1,4 @@
-import {FACE_DATA} from "./Data";
+import Session from "./Session";
 import * as utils from "./Utils";
 import ImageProcessor from "./ImageProcessor";
 
@@ -64,9 +64,13 @@ class Histogram {
     return (totalFrequencies === dataLength / 4) && Math.round(totalNormalizedValue) === 1;
   }
 
-  static generateHistogramValue(canvas) {
-    console.log(this.compareHistogram(utils.valuesArray(this.uniformBinary(ImageProcessor.getImageData(canvas)), 'normalized'), FACE_DATA['Sagar Chamling']));
-    console.log(utils.valuesArray(this.uniformBinary(ImageProcessor.getImageData(canvas)), 'normalized'));
+  static generateHistogramValue(canvas, name) {
+    let data = {};
+    if (Session.has()) {
+      data = Session.get('data');
+    }
+    data[name] = utils.valuesArray(this.uniformBinary(ImageProcessor.getImageData(canvas)), 'normalized');
+    Session.put('data', data);
   }
 }
 

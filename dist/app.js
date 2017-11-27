@@ -138,6 +138,12 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _Session = __webpack_require__(13);
+
+var _Session2 = _interopRequireDefault(_Session);
+
+var _Data = __webpack_require__(3);
+
 var _Utils = __webpack_require__(0);
 
 var utils = _interopRequireWildcard(_Utils);
@@ -146,11 +152,9 @@ var _Histogram = __webpack_require__(2);
 
 var _Histogram2 = _interopRequireDefault(_Histogram);
 
-var _Data = __webpack_require__(3);
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -239,18 +243,24 @@ var ImageProcessor = function () {
         value: 1,
         name: 'Unknown'
       };
-      for (var key in _Data.FACE_DATA) {
-        if (_Data.FACE_DATA.hasOwnProperty(key)) {
-          var difference = _Histogram2.default.compareHistogram(utils.valuesArray(observedHistogram, 'normalized'), _Data.FACE_DATA[key]);
+
+      ImageProcessor.compareWithData(observedHistogram, Object.assign({}, _Session2.default.get('data'), _Data.FACE_DATA), maxMatch);
+
+      if (maxMatch.value < utils.CHI_RECOGNITION_DOF) {
+        return maxMatch;
+      }
+    }
+  }, {
+    key: "compareWithData",
+    value: function compareWithData(relativeData, data, maxMatch) {
+      for (var key in data) {
+        if (data.hasOwnProperty(key)) {
+          var difference = _Histogram2.default.compareHistogram(utils.valuesArray(relativeData, 'normalized'), data[key]);
           if (difference < maxMatch.value) {
             maxMatch.name = key;
             maxMatch.value = difference;
           }
         }
-      }
-
-      if (maxMatch.value < utils.CHI_RECOGNITION_DOF) {
-        return maxMatch;
       }
     }
   }]);
@@ -273,7 +283,9 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _Data = __webpack_require__(3);
+var _Session = __webpack_require__(13);
+
+var _Session2 = _interopRequireDefault(_Session);
 
 var _Utils = __webpack_require__(0);
 
@@ -283,9 +295,9 @@ var _ImageProcessor = __webpack_require__(1);
 
 var _ImageProcessor2 = _interopRequireDefault(_ImageProcessor);
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -364,9 +376,13 @@ var Histogram = function () {
     }
   }, {
     key: "generateHistogramValue",
-    value: function generateHistogramValue(canvas) {
-      console.log(this.compareHistogram(utils.valuesArray(this.uniformBinary(_ImageProcessor2.default.getImageData(canvas)), 'normalized'), _Data.FACE_DATA['Sagar Chamling']));
-      console.log(utils.valuesArray(this.uniformBinary(_ImageProcessor2.default.getImageData(canvas)), 'normalized'));
+    value: function generateHistogramValue(canvas, name) {
+      var data = {};
+      if (_Session2.default.has()) {
+        data = _Session2.default.get('data');
+      }
+      data[name] = utils.valuesArray(this.uniformBinary(_ImageProcessor2.default.getImageData(canvas)), 'normalized');
+      _Session2.default.put('data', data);
     }
   }]);
 
@@ -386,7 +402,6 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 var FACE_DATA = exports.FACE_DATA = {
-  "Sagar Chamling": [0.12361111111111112, 0.019567901234567902, 0.006975308641975308, 0.004598765432098765, 0.010339506172839507, 0.004598765432098765, 0.008271604938271605, 0.01888888888888889, 0.004382716049382716, 0.008580246913580248, 0.022376543209876542, 0.03382716049382716, 0.0071913580246913585, 0.008703703703703703, 0.020771604938271605, 0.03873456790123457, 0.026419753086419754, 0.004135802469135802, 0.010802469135802469, 0.02259259259259259, 0.03175925925925926, 0.020030864197530866, 0.009259259259259259, 0.004567901234567902, 0.0075, 0.024537037037037038, 0.03212962962962963, 0.022098765432098766, 0.010401234567901235, 0.004691358024691358, 0.004166666666666667, 0.010956790123456791, 0.020401234567901234, 0.02574074074074074, 0.01734567901234568, 0.009969135802469135, 0.0038580246913580245, 0.007561728395061728, 0.023271604938271604, 0.028333333333333332, 0.02234567901234568, 0.010308641975308641, 0.005216049382716049, 0.02104938271604938, 0.03453703703703704, 0.019012345679012346, 0.009814814814814814, 0.006234567901234568, 0.034228395061728395, 0.02212962962962963, 0.00867283950617284, 0.005061728395061729, 0.02058641975308642, 0.00867283950617284, 0.003765432098765432, 0.01117283950617284, 0.005061728395061729, 0.007006172839506173, 0.02117283950617284],
   'Sagar Now': [0.17496913580246914, 0.028425925925925927, 0.009104938271604938, 0.00558641975308642, 0.011203703703703704, 0.006265432098765432, 0.009783950617283951, 0.019969135802469135, 0.006080246913580247, 0.009382716049382716, 0.019444444444444445, 0.027993827160493825, 0.009938271604938272, 0.010771604938271605, 0.019537037037037037, 0.029753086419753088, 0.02432098765432099, 0.006388888888888889, 0.011018518518518518, 0.013672839506172839, 0.0179320987654321, 0.017098765432098765, 0.010895061728395062, 0.005462962962962963, 0.0072839506172839505, 0.01910493827160494, 0.01993827160493827, 0.015308641975308642, 0.012098765432098766, 0.006759259259259259, 0.005864197530864198, 0.010462962962962962, 0.016080246913580246, 0.020555555555555556, 0.017808641975308643, 0.0120679012345679, 0.006481481481481481, 0.008055555555555555, 0.02117283950617284, 0.025833333333333333, 0.01756172839506173, 0.010185185185185186, 0.007808641975308642, 0.017407407407407406, 0.026450617283950616, 0.017993827160493827, 0.009969135802469135, 0.008796296296296297, 0.025, 0.020895061728395063, 0.008518518518518519, 0.006913580246913581, 0.016790123456790124, 0.008796296296296297, 0.005185185185185185, 0.009814814814814814, 0.006820987654320988, 0.008919753086419752, 0.0362962962962963]
 };
 
@@ -427,7 +442,20 @@ document.getElementById('webCam').addEventListener('click', function () {
 });
 
 document.getElementById('capture').addEventListener('click', function () {
-  faceMess.capture();
+  if (faceMess.webcam.isActive) {
+    var input = document.querySelector('.name input');
+    faceMess.stopWebCam();
+    webCamIcon.setAttribute('class', 'fa fa-play fa-2x');
+    input.style.display = 'block';
+    input.onkeydown = function (event) {
+      if (event.keyCode === 13) {
+        // Enter
+        faceMess.capture(input.value);
+        input.style.display = 'none';
+        input.value = '';
+      }
+    };
+  }
 });
 
 /***/ }),
@@ -486,9 +514,8 @@ var FaceMess = function () {
     }
   }, {
     key: "capture",
-    value: function capture() {
-      this.webcam.capture();
-      this.webcam.stop();
+    value: function capture(name) {
+      this.webcam.capture(name);
     }
   }, {
     key: "browseImage",
@@ -619,13 +646,13 @@ var WebCam = function () {
     }
   }, {
     key: "capture",
-    value: function capture() {
+    value: function capture(name) {
       var _capturedContext;
 
       this.capturedContext.clearRect(0, 0, this.capturedCanvas.width, this.capturedCanvas.height);
       (_capturedContext = this.capturedContext).drawImage.apply(_capturedContext, [this.canvas].concat(_toConsumableArray(utils.FACE_FRAME), [0, 0, this.capturedCanvas.width, this.capturedCanvas.height]));
-      this.drawOutput(_ImageProcessor2.default.evaluateRecognition(this.capturedCanvas));
-      _Histogram2.default.generateHistogramValue(this.capturedCanvas);
+      _ImageProcessor2.default.extractFeature(this.capturedCanvas);
+      _Histogram2.default.generateHistogramValue(this.capturedCanvas, name);
     }
 
     /**
@@ -682,6 +709,55 @@ exports.default = WebCam;
 /***/ (function(module, exports) {
 
 // removed by extract-text-webpack-plugin
+
+/***/ }),
+/* 9 */,
+/* 10 */,
+/* 11 */,
+/* 12 */,
+/* 13 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Session = function () {
+  function Session() {
+    _classCallCheck(this, Session);
+  }
+
+  _createClass(Session, null, [{
+    key: "has",
+    value: function has() {
+      return !!sessionStorage.length;
+    }
+  }, {
+    key: "put",
+    value: function put(key, val) {
+      sessionStorage[key] = JSON.stringify(val);
+    }
+  }, {
+    key: "get",
+    value: function get(key) {
+      if (this.has()) {
+        return JSON.parse(sessionStorage[key]);
+      }
+      return null;
+    }
+  }]);
+
+  return Session;
+}();
+
+exports.default = Session;
 
 /***/ })
 /******/ ]);
