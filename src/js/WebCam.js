@@ -32,9 +32,9 @@ class WebCam {
       this.flipHorizontal();
       this.drawRecognitionFrame();
       this.capturedContext.drawImage(this.canvas, (utils.CANVAS_WIDTH - utils.FACE_WIDTH) / 2, (utils.CANVAS_HEIGHT - utils.FACE_HEIGHT) / 2, utils.FACE_WIDTH, utils.FACE_HEIGHT, 0, 0, this.capturedCanvas.width, this.capturedCanvas.height);
-      ImageProcessor.evaluateRecognition(this.capturedCanvas);
 
       this.cameraTimeout = setTimeout(draw, 100, this.video, this.context);
+      this.drawOutput(ImageProcessor.evaluateRecognition(this.capturedCanvas));
     };
     this.isActive = true;
   }
@@ -48,7 +48,7 @@ class WebCam {
   capture() {
     this.capturedContext.clearRect(0, 0, this.capturedCanvas.width, this.capturedCanvas.height);
     this.capturedContext.drawImage(this.canvas, ...utils.FACE_FRAME, 0, 0, this.capturedCanvas.width, this.capturedCanvas.height);
-    ImageProcessor.evaluateRecognition(this.capturedCanvas);
+    this.drawOutput(ImageProcessor.evaluateRecognition(this.capturedCanvas));
     Histogram.generateHistogramValue(this.capturedCanvas);
   }
 
@@ -76,6 +76,16 @@ class WebCam {
     this.context.lineTo(utils.FACE_FRAME[0], utils.FACE_FRAME[1]);
     this.context.stroke();
     this.context.closePath();
+  }
+
+  drawOutput(maxMatch) {
+    if (maxMatch !== undefined) {
+      this.context.textAlign = 'center';
+      this.context.font = 'bold 20pt Calibri';
+      this.context.fillStyle = '#ffffff';
+      this.context.fillText("You're", this.canvas.width / 2, this.canvas.height / 2 - 20);
+      this.context.fillText(maxMatch.name, this.canvas.width / 2, this.canvas.height / 2 + 20);
+    }
   }
 }
 

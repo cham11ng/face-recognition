@@ -69,7 +69,7 @@ class ImageProcessor {
     let observedHistogram = Histogram.uniformBinary(ImageProcessor.getImageData(canvas));
     let maxMatch = {
       value: 1,
-      name: ''
+      name: 'Unknown'
     };
     for (let key in FACE_DATA) {
       if (FACE_DATA.hasOwnProperty(key)) {
@@ -82,20 +82,8 @@ class ImageProcessor {
     }
 
     if (maxMatch.value < utils.CHI_RECOGNITION_DOF) {
-      this.displayOutput(maxMatch);
+      return maxMatch;
     }
-  }
-
-  static displayOutput(maxMatch) {
-    console.log(maxMatch.name, maxMatch.value);
-    /*
-    let context = canvas.getContext("2d");
-    context.clearRect(0, 0, canvas.width, canvas.height);
-    context.font = 'bold 18pt Calibri';
-    context.textAlign = 'center';
-    context.fillText("You're", canvas.width / 2, canvas.height / 2 - 20);
-    context.fillText(name, canvas.width / 2, canvas.height / 2 + 20);
-    */
   }
 }
 
