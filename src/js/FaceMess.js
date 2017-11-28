@@ -47,7 +47,7 @@ class FaceMess {
       let context = this.capturedCanvas.getContext('2d');
       context.clearRect(0, 0, utils.CAPTURE_WIDTH, utils.CAPTURE_HEIGHT);
       context.drawImage(image, 0, (utils.CAPTURE_HEIGHT - image.height * scale) / 2, utils.CAPTURE_WIDTH, image.height * scale);
-      ImageProcessor.extractFeature(this.capturedCanvas);
+      ImageProcessor.extract8PointRadius1Feature(this.capturedCanvas);
     };
   }
 

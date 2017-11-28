@@ -89,11 +89,15 @@ var FACE_FRAME = exports.FACE_FRAME = [(CANVAS_WIDTH - FACE_WIDTH) / 2, (CANVAS_
 
 var POINT_8 = exports.POINT_8 = 8;
 var RADIUS_1 = exports.RADIUS_1 = 1;
+var RADIUS_2 = exports.RADIUS_2 = 2;
 var RGBA_SHIFT = exports.RGBA_SHIFT = 4;
 var NEIGHBOUR_SHIFT = exports.NEIGHBOUR_SHIFT = 3;
+var WEIGHT_BLOCK = exports.WEIGHT_BLOCK = [0.15, 0.08, 0.15, 0.08, 0.15, 0.08, 0.08, 0.15, 0.08];
 var UNIFORM_BINARY_PATTERN = exports.UNIFORM_BINARY_PATTERN = ['non', 0, 1, 2, 3, 4, 6, 7, 8, 12, 14, 15, 16, 24, 28, 30, 31, 32, 48, 56, 60, 62, 63, 64, 96, 112, 120, 124, 126, 127, 128, 129, 131, 135, 143, 159, 191, 192, 193, 195, 199, 207, 223, 224, 225, 227, 231, 239, 240, 241, 243, 247, 248, 249, 251, 252, 253, 254, 255];
+var BLOCK_9_BY_9 = exports.BLOCK_9_BY_9 = [[0, 0, CAPTURE_WIDTH / 3 + 1, CAPTURE_HEIGHT / 3 + 1], [CAPTURE_WIDTH / 3 - 1, 0, CAPTURE_WIDTH / 3 + 2, CAPTURE_HEIGHT / 3 + 1], [CAPTURE_WIDTH * 2 / 3 - 1, 0, CAPTURE_WIDTH + 1, CAPTURE_HEIGHT / 3 + 1], [0, CAPTURE_HEIGHT / 3 - 1, CAPTURE_WIDTH / 3 + 1, CAPTURE_HEIGHT / 3 + 2], [CAPTURE_WIDTH / 3 - 1, CAPTURE_HEIGHT / 3 - 1, CAPTURE_WIDTH / 3 + 2, CAPTURE_HEIGHT / 3 + 2], [CAPTURE_WIDTH * 2 / 3 - 1, CAPTURE_HEIGHT / 3 - 1, CAPTURE_WIDTH + 1, CAPTURE_HEIGHT / 3 + 2], [0, CAPTURE_HEIGHT * 2 / 3 - 1, CAPTURE_WIDTH / 3 + 1, CAPTURE_HEIGHT / 3 + 1], [CAPTURE_WIDTH / 3 - 1, CAPTURE_HEIGHT * 2 / 3 - 1, CAPTURE_WIDTH / 3 + 2, CAPTURE_HEIGHT / 3 + 1], [CAPTURE_WIDTH * 2 / 3 - 1, CAPTURE_HEIGHT * 2 / 3 - 1, CAPTURE_WIDTH + 1, CAPTURE_HEIGHT / 3 + 1]];
 
 var CHI_RECOGNITION_DOF = exports.CHI_RECOGNITION_DOF = 0.02;
+var CHI_RECOGNITION_BLOCKS_DOF = exports.CHI_RECOGNITION_BLOCKS_DOF = 0.05;
 var CHI_PREDICTION_DOF = exports.CHI_PREDICTION_DOF = 0.1;
 
 function unitStep(n) {
@@ -156,6 +160,8 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var ImageProcessor = function () {
@@ -172,7 +178,7 @@ var ImageProcessor = function () {
         parameters[_key - 1] = arguments[_key];
       }
 
-      return parameters.length === 4 ? (_canvas$getContext = canvas.getContext("2d")).getImageData.apply(_canvas$getContext, parameters) : canvas.getContext("2d").getImageData(0, 0, canvas.width, canvas.height);
+      return parameters.length === 4 ? (_canvas$getContext = canvas.getContext('2d')).getImageData.apply(_canvas$getContext, parameters) : canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height);
     }
   }, {
     key: "rgb2gray",
@@ -197,8 +203,10 @@ var ImageProcessor = function () {
       return pixel.data[0];
     }
   }, {
-    key: "extractFeature",
-    value: function extractFeature(canvas) {
+    key: "extract8PointRadius1Feature",
+    value: function extract8PointRadius1Feature(canvas) {
+      var radius = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
+
       var context = canvas.getContext('2d');
       var imageData = this.getImageData(canvas);
       var data = imageData.data;
@@ -210,14 +218,14 @@ var ImageProcessor = function () {
           var neighbourValue = [];
           var centerPosition = utils.get1DPosition(canvas.width, x, y) * utils.RGBA_SHIFT;
           var centerValue = this.getGrayScaleValue(backupData, centerPosition);
-          neighbourValue[7] = this.getGrayScaleValue(backupData, utils.get1DPosition(canvas.width, x - 1, y - 1) * utils.RGBA_SHIFT) - centerValue;
-          neighbourValue[6] = this.getGrayScaleValue(backupData, utils.get1DPosition(canvas.width, x, y - 1) * utils.RGBA_SHIFT) - centerValue;
-          neighbourValue[5] = this.getGrayScaleValue(backupData, utils.get1DPosition(canvas.width, x + 1, y - 1) * utils.RGBA_SHIFT) - centerValue;
-          neighbourValue[4] = this.getGrayScaleValue(backupData, utils.get1DPosition(canvas.width, x + 1, y) * utils.RGBA_SHIFT) - centerValue;
-          neighbourValue[3] = this.getGrayScaleValue(backupData, utils.get1DPosition(canvas.width, x + 1, y + 1) * utils.RGBA_SHIFT) - centerValue;
-          neighbourValue[2] = this.getGrayScaleValue(backupData, utils.get1DPosition(canvas.width, x, y + 1) * utils.RGBA_SHIFT) - centerValue;
-          neighbourValue[1] = this.getGrayScaleValue(backupData, utils.get1DPosition(canvas.width, x - 1, y + 1) * utils.RGBA_SHIFT) - centerValue;
-          neighbourValue[0] = this.getGrayScaleValue(backupData, utils.get1DPosition(canvas.width, x - 1, y) * utils.RGBA_SHIFT) - centerValue;
+          neighbourValue[7] = this.getGrayScaleValue(backupData, utils.get1DPosition(canvas.width, x - radius, y - radius) * utils.RGBA_SHIFT) - centerValue;
+          neighbourValue[6] = this.getGrayScaleValue(backupData, utils.get1DPosition(canvas.width, x, y - radius) * utils.RGBA_SHIFT) - centerValue;
+          neighbourValue[5] = this.getGrayScaleValue(backupData, utils.get1DPosition(canvas.width, x + radius, y - radius) * utils.RGBA_SHIFT) - centerValue;
+          neighbourValue[4] = this.getGrayScaleValue(backupData, utils.get1DPosition(canvas.width, x + radius, y) * utils.RGBA_SHIFT) - centerValue;
+          neighbourValue[3] = this.getGrayScaleValue(backupData, utils.get1DPosition(canvas.width, x + radius, y + radius) * utils.RGBA_SHIFT) - centerValue;
+          neighbourValue[2] = this.getGrayScaleValue(backupData, utils.get1DPosition(canvas.width, x, y + radius) * utils.RGBA_SHIFT) - centerValue;
+          neighbourValue[1] = this.getGrayScaleValue(backupData, utils.get1DPosition(canvas.width, x - radius, y + radius) * utils.RGBA_SHIFT) - centerValue;
+          neighbourValue[0] = this.getGrayScaleValue(backupData, utils.get1DPosition(canvas.width, x - radius, y) * utils.RGBA_SHIFT) - centerValue;
 
           for (var k = 0, totalNeighbour = neighbourValue.length; k < totalNeighbour; k++) {
             sum += utils.unitStep(neighbourValue[k]) * Math.pow(2, k);
@@ -237,25 +245,36 @@ var ImageProcessor = function () {
   }, {
     key: "evaluateRecognition",
     value: function evaluateRecognition(canvas) {
-      this.extractFeature(canvas);
-      var observedHistogram = _Histogram2.default.uniformBinary(ImageProcessor.getImageData(canvas));
-      var maxMatch = {
+      this.extract8PointRadius1Feature(canvas);
+
+      /*let maxMatch = {
+        value: 1,
+        name: 'Unknown'
+      };*/
+      var maxMatchBlock = {
         value: 1,
         name: 'Unknown'
       };
+      var observedBlockHistogram = [];
+      // let observedHistogram = Histogram.uniformBinary(this.getImageData(canvas));
 
-      ImageProcessor.compareWithData(observedHistogram, Object.assign({}, _Session2.default.get('data'), _Data.FACE_DATA), maxMatch);
+      for (var i = 0, totalBlock = utils.BLOCK_9_BY_9.length; i < totalBlock; i++) {
+        observedBlockHistogram = observedBlockHistogram.concat(utils.valuesArray(_Histogram2.default.uniformBinary(this.getImageData.apply(this, [canvas].concat(_toConsumableArray(utils.BLOCK_9_BY_9[i])))), 'normalized'));
+      }
 
-      if (maxMatch.value < utils.CHI_RECOGNITION_DOF) {
-        return maxMatch;
+      // this.compareWithData(utils.valuesArray(observedHistogram, 'normalized'), Object.assign({}, Session.get('data'), FACE_DATA), 'area', maxMatch);
+      this.compareWithData(observedBlockHistogram, Object.assign({}, _Session2.default.get('data'), _Data.FACE_DATA), 'blocks', maxMatchBlock);
+
+      if (maxMatchBlock.value < utils.CHI_RECOGNITION_BLOCKS_DOF) {
+        return maxMatchBlock;
       }
     }
   }, {
     key: "compareWithData",
-    value: function compareWithData(relativeData, data, maxMatch) {
+    value: function compareWithData(relativeData, data, type, maxMatch) {
       for (var key in data) {
         if (data.hasOwnProperty(key)) {
-          var difference = _Histogram2.default.compareHistogram(utils.valuesArray(relativeData, 'normalized'), data[key]);
+          var difference = _Histogram2.default.compareHistogram(relativeData, data[key][type]);
           if (difference < maxMatch.value) {
             maxMatch.name = key;
             maxMatch.value = difference;
@@ -298,6 +317,8 @@ var _ImageProcessor2 = _interopRequireDefault(_ImageProcessor);
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -350,7 +371,7 @@ var Histogram = function () {
   }, {
     key: "compareHistogram",
     value: function compareHistogram(firstHistogram, secondHistogram) {
-      return this.chiSquare(firstHistogram, secondHistogram);
+      return this.weightedChiSquare(firstHistogram, secondHistogram);
     }
   }, {
     key: "chiSquare",
@@ -359,6 +380,18 @@ var Histogram = function () {
       var sum = 0;
       for (var i = 0; i < total; i++) {
         sum += Math.pow(firstHistogram[i] - secondHistogram[i], 2) / secondHistogram[i];
+      }
+
+      return sum;
+    }
+  }, {
+    key: "weightedChiSquare",
+    value: function weightedChiSquare(firstHistogram, secondHistogram) {
+      var total = firstHistogram.length;
+      var sum = 0;
+      for (var i = 0, j = 0; i < total; i++) {
+        j = Math.floor(i / utils.UNIFORM_BINARY_PATTERN.length);
+        sum += utils.WEIGHT_BLOCK[j] * Math.pow(firstHistogram[i] - secondHistogram[i], 2) / (firstHistogram[i] + secondHistogram[i]);
       }
 
       return sum;
@@ -377,11 +410,20 @@ var Histogram = function () {
   }, {
     key: "generateHistogramValue",
     value: function generateHistogramValue(canvas, name) {
-      var data = {};
+      var data = {},
+          observedBlockHistogram = [];
       if (_Session2.default.has()) {
         data = _Session2.default.get('data');
       }
-      data[name] = utils.valuesArray(this.uniformBinary(_ImageProcessor2.default.getImageData(canvas)), 'normalized');
+
+      for (var i = 0, totalBlock = utils.BLOCK_9_BY_9.length; i < totalBlock; i++) {
+        observedBlockHistogram = observedBlockHistogram.concat(utils.valuesArray(Histogram.uniformBinary(_ImageProcessor2.default.getImageData.apply(_ImageProcessor2.default, [canvas].concat(_toConsumableArray(utils.BLOCK_9_BY_9[i])))), 'normalized'));
+      }
+
+      data[name] = {
+        area: utils.valuesArray(this.uniformBinary(_ImageProcessor2.default.getImageData(canvas)), 'normalized'),
+        blocks: observedBlockHistogram
+      };
       _Session2.default.put('data', data);
     }
   }]);
@@ -401,9 +443,7 @@ exports.default = Histogram;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-var FACE_DATA = exports.FACE_DATA = {
-  'Sagar Now': [0.17496913580246914, 0.028425925925925927, 0.009104938271604938, 0.00558641975308642, 0.011203703703703704, 0.006265432098765432, 0.009783950617283951, 0.019969135802469135, 0.006080246913580247, 0.009382716049382716, 0.019444444444444445, 0.027993827160493825, 0.009938271604938272, 0.010771604938271605, 0.019537037037037037, 0.029753086419753088, 0.02432098765432099, 0.006388888888888889, 0.011018518518518518, 0.013672839506172839, 0.0179320987654321, 0.017098765432098765, 0.010895061728395062, 0.005462962962962963, 0.0072839506172839505, 0.01910493827160494, 0.01993827160493827, 0.015308641975308642, 0.012098765432098766, 0.006759259259259259, 0.005864197530864198, 0.010462962962962962, 0.016080246913580246, 0.020555555555555556, 0.017808641975308643, 0.0120679012345679, 0.006481481481481481, 0.008055555555555555, 0.02117283950617284, 0.025833333333333333, 0.01756172839506173, 0.010185185185185186, 0.007808641975308642, 0.017407407407407406, 0.026450617283950616, 0.017993827160493827, 0.009969135802469135, 0.008796296296296297, 0.025, 0.020895061728395063, 0.008518518518518519, 0.006913580246913581, 0.016790123456790124, 0.008796296296296297, 0.005185185185185185, 0.009814814814814814, 0.006820987654320988, 0.008919753086419752, 0.0362962962962963]
-};
+var FACE_DATA = exports.FACE_DATA = {};
 
 /***/ }),
 /* 4 */
@@ -529,7 +569,7 @@ var FaceMess = function () {
         var context = _this.capturedCanvas.getContext('2d');
         context.clearRect(0, 0, utils.CAPTURE_WIDTH, utils.CAPTURE_HEIGHT);
         context.drawImage(image, 0, (utils.CAPTURE_HEIGHT - image.height * scale) / 2, utils.CAPTURE_WIDTH, image.height * scale);
-        _ImageProcessor2.default.extractFeature(_this.capturedCanvas);
+        _ImageProcessor2.default.extract8PointRadius1Feature(_this.capturedCanvas);
       };
     }
   }, {
@@ -651,7 +691,7 @@ var WebCam = function () {
 
       this.capturedContext.clearRect(0, 0, this.capturedCanvas.width, this.capturedCanvas.height);
       (_capturedContext = this.capturedContext).drawImage.apply(_capturedContext, [this.canvas].concat(_toConsumableArray(utils.FACE_FRAME), [0, 0, this.capturedCanvas.width, this.capturedCanvas.height]));
-      _ImageProcessor2.default.extractFeature(this.capturedCanvas);
+      _ImageProcessor2.default.extract8PointRadius1Feature(this.capturedCanvas);
       _Histogram2.default.generateHistogramValue(this.capturedCanvas, name);
     }
 
@@ -746,9 +786,12 @@ var Session = function () {
     }
   }, {
     key: "get",
-    value: function get(key) {
+    value: function get(key, key2) {
       if (this.has()) {
-        return JSON.parse(sessionStorage[key]);
+        if (key2 === undefined) {
+          return JSON.parse(sessionStorage[key]);
+        }
+        return JSON.parse(sessionStorage[key])[key2];
       }
       return null;
     }

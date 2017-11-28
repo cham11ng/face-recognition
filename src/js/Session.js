@@ -7,9 +7,12 @@ class Session {
     sessionStorage[key] = JSON.stringify(val);
   }
 
-  static get(key) {
+  static get(key, key2) {
     if (this.has()) {
-      return JSON.parse(sessionStorage[key]);
+      if (key2 === undefined) {
+        return JSON.parse(sessionStorage[key]);
+      }
+      return JSON.parse(sessionStorage[key])[key2];
     }
     return null;
   }

@@ -6,8 +6,8 @@ import Histogram from "./Histogram";
 class ImageProcessor {
   static getImageData(canvas, ...parameters) {
     return parameters.length === 4
-      ? canvas.getContext("2d").getImageData(...parameters)
-      : canvas.getContext("2d").getImageData(0, 0, canvas.width, canvas.height);
+      ? canvas.getContext('2d').getImageData(...parameters)
+      : canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height);
   }
 
   static rgb2gray(data) {
@@ -29,7 +29,7 @@ class ImageProcessor {
     return pixel.data[0];
   }
 
-  static extractFeature(canvas) {
+  static extract8PointRadius1Feature(canvas, radius = 1) {
     let context = canvas.getContext('2d');
     let imageData = this.getImageData(canvas);
     let data = imageData.data;
@@ -41,14 +41,14 @@ class ImageProcessor {
         let neighbourValue = [];
         let centerPosition = utils.get1DPosition(canvas.width, x, y) * utils.RGBA_SHIFT;
         let centerValue = this.getGrayScaleValue(backupData, centerPosition);
-        neighbourValue[7] = this.getGrayScaleValue(backupData, utils.get1DPosition(canvas.width, x - 1, y - 1) * utils.RGBA_SHIFT) - centerValue;
-        neighbourValue[6] = this.getGrayScaleValue(backupData, utils.get1DPosition(canvas.width, x, y - 1) * utils.RGBA_SHIFT) - centerValue;
-        neighbourValue[5] = this.getGrayScaleValue(backupData, utils.get1DPosition(canvas.width, x + 1, y - 1) * utils.RGBA_SHIFT) - centerValue;
-        neighbourValue[4] = this.getGrayScaleValue(backupData, utils.get1DPosition(canvas.width, x + 1, y) * utils.RGBA_SHIFT) - centerValue;
-        neighbourValue[3] = this.getGrayScaleValue(backupData, utils.get1DPosition(canvas.width, x + 1, y + 1) * utils.RGBA_SHIFT) - centerValue;
-        neighbourValue[2] = this.getGrayScaleValue(backupData, utils.get1DPosition(canvas.width, x, y + 1) * utils.RGBA_SHIFT) - centerValue;
-        neighbourValue[1] = this.getGrayScaleValue(backupData, utils.get1DPosition(canvas.width, x - 1, y + 1) * utils.RGBA_SHIFT) - centerValue;
-        neighbourValue[0] = this.getGrayScaleValue(backupData, utils.get1DPosition(canvas.width, x - 1, y) * utils.RGBA_SHIFT) - centerValue;
+        neighbourValue[7] = this.getGrayScaleValue(backupData, utils.get1DPosition(canvas.width, x - radius, y - radius) * utils.RGBA_SHIFT) - centerValue;
+        neighbourValue[6] = this.getGrayScaleValue(backupData, utils.get1DPosition(canvas.width, x, y - radius) * utils.RGBA_SHIFT) - centerValue;
+        neighbourValue[5] = this.getGrayScaleValue(backupData, utils.get1DPosition(canvas.width, x + radius, y - radius) * utils.RGBA_SHIFT) - centerValue;
+        neighbourValue[4] = this.getGrayScaleValue(backupData, utils.get1DPosition(canvas.width, x + radius, y) * utils.RGBA_SHIFT) - centerValue;
+        neighbourValue[3] = this.getGrayScaleValue(backupData, utils.get1DPosition(canvas.width, x + radius, y + radius) * utils.RGBA_SHIFT) - centerValue;
+        neighbourValue[2] = this.getGrayScaleValue(backupData, utils.get1DPosition(canvas.width, x, y + radius) * utils.RGBA_SHIFT) - centerValue;
+        neighbourValue[1] = this.getGrayScaleValue(backupData, utils.get1DPosition(canvas.width, x - radius, y + radius) * utils.RGBA_SHIFT) - centerValue;
+        neighbourValue[0] = this.getGrayScaleValue(backupData, utils.get1DPosition(canvas.width, x - radius, y) * utils.RGBA_SHIFT) - centerValue;
 
         for (let k = 0, totalNeighbour = neighbourValue.length; k < totalNeighbour; k++) {
           sum += utils.unitStep(neighbourValue[k]) * Math.pow(2, k);
@@ -66,24 +66,35 @@ class ImageProcessor {
   }
 
   static evaluateRecognition(canvas) {
-    this.extractFeature(canvas);
-    let observedHistogram = Histogram.uniformBinary(ImageProcessor.getImageData(canvas));
-    let maxMatch = {
+    this.extract8PointRadius1Feature(canvas);
+
+    /*let maxMatch = {
+      value: 1,
+      name: 'Unknown'
+    };*/
+    let maxMatchBlock = {
       value: 1,
       name: 'Unknown'
     };
+    let observedBlockHistogram = [];
+    // let observedHistogram = Histogram.uniformBinary(this.getImageData(canvas));
 
-    ImageProcessor.compareWithData(observedHistogram, Object.assign({}, Session.get('data'), FACE_DATA), maxMatch);
+    for (let i = 0, totalBlock = utils.BLOCK_9_BY_9.length; i < totalBlock; i++) {
+      observedBlockHistogram = observedBlockHistogram.concat(utils.valuesArray(Histogram.uniformBinary(this.getImageData(canvas, ...utils.BLOCK_9_BY_9[i])), 'normalized'));
+    }
 
-    if (maxMatch.value < utils.CHI_RECOGNITION_DOF) {
-      return maxMatch;
+    // this.compareWithData(utils.valuesArray(observedHistogram, 'normalized'), Object.assign({}, Session.get('data'), FACE_DATA), 'area', maxMatch);
+    this.compareWithData(observedBlockHistogram, Object.assign({}, Session.get('data'), FACE_DATA), 'blocks', maxMatchBlock);
+
+    if (maxMatchBlock.value < utils.CHI_RECOGNITION_BLOCKS_DOF) {
+      return maxMatchBlock;
     }
   }
 
-  static compareWithData(relativeData, data, maxMatch) {
+  static compareWithData(relativeData, data, type, maxMatch) {
     for (let key in data) {
       if (data.hasOwnProperty(key)) {
-        let difference = Histogram.compareHistogram(utils.valuesArray(relativeData, 'normalized'), data[key]);
+        let difference = Histogram.compareHistogram(relativeData, data[key][type]);
         if (difference < maxMatch.value) {
           maxMatch.name = key;
           maxMatch.value = difference;

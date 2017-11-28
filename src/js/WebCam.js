@@ -48,7 +48,7 @@ class WebCam {
   capture(name) {
     this.capturedContext.clearRect(0, 0, this.capturedCanvas.width, this.capturedCanvas.height);
     this.capturedContext.drawImage(this.canvas, ...utils.FACE_FRAME, 0, 0, this.capturedCanvas.width, this.capturedCanvas.height);
-    ImageProcessor.extractFeature(this.capturedCanvas);
+    ImageProcessor.extract8PointRadius1Feature(this.capturedCanvas);
     Histogram.generateHistogramValue(this.capturedCanvas, name);
   }
 

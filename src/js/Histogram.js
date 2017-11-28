@@ -42,7 +42,7 @@ class Histogram {
   }
 
   static compareHistogram(firstHistogram, secondHistogram) {
-    return this.chiSquare(firstHistogram, secondHistogram);
+    return this.weightedChiSquare(firstHistogram, secondHistogram);
   }
 
   static chiSquare(firstHistogram, secondHistogram) {
@@ -50,6 +50,17 @@ class Histogram {
     let sum = 0;
     for (let i = 0; i < total; i++) {
       sum += Math.pow((firstHistogram[i] - secondHistogram[i]), 2) / secondHistogram[i];
+    }
+
+    return sum;
+  }
+
+  static weightedChiSquare(firstHistogram, secondHistogram) {
+    let total = firstHistogram.length;
+    let sum = 0;
+    for (let i = 0, j = 0; i < total; i++) {
+      j = Math.floor(i / (utils.UNIFORM_BINARY_PATTERN.length));
+      sum += utils.WEIGHT_BLOCK[j] * Math.pow((firstHistogram[i] - secondHistogram[i]), 2) / (firstHistogram[i] + secondHistogram[i]);
     }
 
     return sum;
@@ -65,11 +76,19 @@ class Histogram {
   }
 
   static generateHistogramValue(canvas, name) {
-    let data = {};
+    let data = {}, observedBlockHistogram = [];
     if (Session.has()) {
       data = Session.get('data');
     }
-    data[name] = utils.valuesArray(this.uniformBinary(ImageProcessor.getImageData(canvas)), 'normalized');
+
+    for (let i = 0, totalBlock = utils.BLOCK_9_BY_9.length; i < totalBlock; i++) {
+      observedBlockHistogram = observedBlockHistogram.concat(utils.valuesArray(Histogram.uniformBinary(ImageProcessor.getImageData(canvas, ...utils.BLOCK_9_BY_9[i])), 'normalized'));
+    }
+
+    data[name] = {
+      area: utils.valuesArray(this.uniformBinary(ImageProcessor.getImageData(canvas)), 'normalized'),
+      blocks: observedBlockHistogram
+    };
     Session.put('data', data);
   }
 }
