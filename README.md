@@ -1,5 +1,5 @@
-# Face Recognition
-Face Recognition using Local Binary Pattern (LBP)
+# Face Recognition in Javascript
+Face Recognition is based on Local Binary Pattern (LBP) implemented in javascript. Check the demo [here](https://cham11ng.github.io/face-recognition/).
 
 ## Requirement
 * Node (v8.9.1)
@@ -7,7 +7,7 @@ Face Recognition using Local Binary Pattern (LBP)
 * Yarn (v1.3.2)
 
 ## Installation
-* `git clone git@github.com:leapfroglets/face-recognition.git`
+* `git clone git@github.com:cham11ng/face-recognition.git`
 * `yarn install`
 * `yarn run build`
 
@@ -18,7 +18,7 @@ Face Recognition using Local Binary Pattern (LBP)
 * Type your name.
 * Again, click play (>) button.
 
-***OMG!*** It recognizes you. ;)
+***Tada!*** It recognizes you. ;)
 
 ## Contributor
-cham11ng | 2017
+[cham11ng](https://github.com/cham11ng) | 2017
