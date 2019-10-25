@@ -12,8 +12,10 @@ class Session {
       if (key2 === undefined) {
         return JSON.parse(sessionStorage[key]);
       }
+
       return JSON.parse(sessionStorage[key])[key2];
     }
+
     return null;
   }
 }

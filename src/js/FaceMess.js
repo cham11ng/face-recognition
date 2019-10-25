@@ -1,6 +1,6 @@
-import WebCam from "./WebCam";
-import * as utils from "./Utils";
-import ImageProcessor from "./ImageProcessor";
+import WebCam from './WebCam';
+import * as utils from './Utils';
+import ImageProcessor from './ImageProcessor';
 
 class FaceMess {
   constructor(canvas) {
@@ -14,25 +14,26 @@ class FaceMess {
   }
 
   static createById(id) {
-    let canvas = document.getElementById(id);
+    const canvas = document.getElementById(id);
     canvas.height = utils.CANVAS_HEIGHT;
     canvas.width = utils.CANVAS_WIDTH;
+
     return new FaceMess(canvas);
   }
 
   static createWithImage(id, src) {
-    let canvasObject = FaceMess.createById(id);
+    const canvasObject = FaceMess.createById(id);
     canvasObject.browseImage(src);
 
     return canvasObject;
   }
 
   startWebCam() {
-    this.webcam.start();
+    return this.webcam.start();
   }
 
   stopWebCam() {
-    this.webcam.stop();
+    return this.webcam.stop();
   }
 
   capture(name) {
@@ -40,20 +41,26 @@ class FaceMess {
   }
 
   browseImage(src) {
-    let image = new Image();
+    const image = new Image();
     image.src = src;
     image.onload = () => {
-      let scale = utils.CAPTURE_WIDTH / image.width;
-      let context = this.capturedCanvas.getContext('2d');
+      const scale = utils.CAPTURE_WIDTH / image.width;
+      const context = this.capturedCanvas.getContext('2d');
       context.clearRect(0, 0, utils.CAPTURE_WIDTH, utils.CAPTURE_HEIGHT);
-      context.drawImage(image, 0, (utils.CAPTURE_HEIGHT - image.height * scale) / 2, utils.CAPTURE_WIDTH, image.height * scale);
+      context.drawImage(
+        image,
+        0,
+        (utils.CAPTURE_HEIGHT - image.height * scale) / 2,
+        utils.CAPTURE_WIDTH,
+        image.height * scale
+      );
       ImageProcessor.extract8PointRadius1Feature(this.capturedCanvas);
     };
   }
 
   handleLocalFile(file) {
     if (file.type.match(/image.*/)) {
-      this.browseImage(window.URL.createObjectURL(file));
+      this.browseImage(window.URL.createObjectURL(new Blob(file, { type: 'application/zip' })));
     }
   }
 }

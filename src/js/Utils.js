@@ -53,11 +53,12 @@ export function getCoordinate(colLength, position) {
 }
 
 export function valuesArray(arrayOfObjects, key) {
-  let values = [];
+  const values = [];
   for (let i = 0, total = arrayOfObjects.length; i < total; i++) {
     if (arrayOfObjects[i].hasOwnProperty(key)) {
       values.push(arrayOfObjects[i][key]);
     }
   }
+
   return values;
 }
