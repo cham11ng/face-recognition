@@ -2,8 +2,8 @@ import FaceMess from './js/FaceMess';
 
 FaceMess.createWithImage('camera', 'images/lenna.png');
 
-let faceMess = FaceMess.createById('camera');
-let webCamIcon = document.querySelector('#webCam .fa');
+const faceMess = FaceMess.createById('camera');
+const webCamIcon = document.querySelector('#webCam .fa');
 
 document.getElementById('webCam').addEventListener('click', () => {
   if (faceMess.webcam.isActive) {
@@ -17,7 +17,7 @@ document.getElementById('webCam').addEventListener('click', () => {
 
 document.getElementById('capture').addEventListener('click', () => {
   if (faceMess.webcam.isActive) {
-    let input = document.querySelector('.name input');
+    const input = document.querySelector('.name input');
     faceMess.stopWebCam();
     webCamIcon.setAttribute('class', 'fa fa-play fa-2x');
     input.style.display = 'block';
@@ -27,6 +27,6 @@ document.getElementById('capture').addEventListener('click', () => {
         input.style.display = 'none';
         input.value = '';
       }
-    }
+    };
   }
 });
