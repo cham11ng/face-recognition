@@ -30,7 +30,7 @@ $ yarn build
 
 ## Troubleshooting
 
-The icon may not apper after you build in you local. Simply checkout `app.css`.
+The icon may not appear after you build in your local. Simply checkout `app.css`.
 
 ## Contributor
 
