@@ -16,7 +16,7 @@
     "node-sass": "^7.0.0",
     "sass-loader": "^8.0.0",
     "style-loader": "^1.0.0",
-    "webpack": "^5.94.0",
+    "webpack": "^5.104.1",
     "webpack-cli": "^3.3.6"
   },
   "scripts": {
