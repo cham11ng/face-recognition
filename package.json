@@ -6,7 +6,7 @@
   "author": "Sagar Chamling <sgr.raee@gmail.com>",
   "license": "MIT",
   "devDependencies": {
-    "@babel/core": "7.6.4",
+    "@babel/core": "7.29.6",
     "@babel/preset-env": "^7.2.0",
     "babel-loader": "8.0.6",
     "css-loader": "^3.2.0",
